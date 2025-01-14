@@ -482,7 +482,7 @@ def playing():
         # Initialize mouse clicked flag
         mouse_clicked = False
 
-        # Handle events
+        # Handle events:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
