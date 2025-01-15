@@ -51,7 +51,7 @@ LIVES_IMAGE = pg.transform.scale(pg.image.load("assets/images/heart.png"), (50, 
 FONT_COMICSANSMS = pg.font.SysFont('dejavusans', 40)
 FONT_TUROK = pg.font.SysFont('timesnewroman', 60)
 FONT_PIKACHU = pg.font.Font("assets/font/pikachu.otf", 50)
-FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 50)
+FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 30)
 
 # Start screen
 START_SCREEN_BACKGOUND = pg.transform.scale(pg.image.load("assets/images/background/b1g.jpg"), (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -237,6 +237,12 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
             current_hint = get_hint(board)
             if not current_hint:
                 reset_board(board)
+				# Add reshuffle message
+                reshuffle_text = FONT_ARIAL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
+                text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 80))
+                screen.blit(reshuffle_text, text_rect)
+                pg.display.flip()
+                pg.time.wait(3000)  # Show message for 1 second
                 current_hint = get_hint(board)
             show_hint = True
             click_sound.play()
