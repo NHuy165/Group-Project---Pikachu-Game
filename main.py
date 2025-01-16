@@ -583,7 +583,10 @@ def start_screen():
 							current_player = name_input
 							show_sign_in = False
 						else:
-							sign_in_error = "Incorrect password"
+							if name_input == "[Guest]":
+								sign_in_error = "Leave password blank to play as [Guest]"
+							else:
+								sign_in_error = "Incorrect password"
 							fail_sound.play()
 				elif event.key == pg.K_BACKSPACE:
 					if input_active == "name":
@@ -618,43 +621,41 @@ def start_screen():
 			password_label = FONT_ARIAL.render("PASSWORD:", True, (0, 0, 0))  # Changed to black
 
 			# Position labels with reduced spacing
-		
-			screen.blit(username_label, (panel_rect.centerx - 200, panel_rect.centery - 75))
-			screen.blit(password_label, (panel_rect.centerx - 200, panel_rect.centery - 15))
+			screen.blit(username_label, (panel_rect.centerx - 200, panel_rect.centery - 65))
+			screen.blit(password_label, (panel_rect.centerx - 200, panel_rect.centery - 5))
 
 			# Draw input fields and text
 			name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
 			password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
 
-			# Center the input text with reduced spacing
-			name_rect = name_text.get_rect(center=(panel_rect.centerx + 50, panel_rect.centery - 75))
-			password_rect = password_text.get_rect(center=(panel_rect.centerx + 50, panel_rect.centery - 15))
+			name_rect = name_text.get_rect(center=(panel_rect.centerx + 50, panel_rect.centery - 55))
+			password_rect = password_text.get_rect(center=(panel_rect.centerx + 50, panel_rect.centery + 5))
 
 			screen.blit(name_text, name_rect)
 			screen.blit(password_text, password_rect)
 
 			# Draw active input indicator
 			if input_active == "name":
-				pg.draw.line(screen, (0, 0, 0),  # Changed to black
+				pg.draw.line(screen, (0, 0, 0),  
 							(name_rect.right + 5, name_rect.top), 
 							(name_rect.right + 5, name_rect.bottom), 2)
 			else:
-				pg.draw.line(screen, (0, 0, 0),  # Changed to black
+				pg.draw.line(screen, (0, 0, 0), 
 							(password_rect.right + 5, password_rect.top), 
 							(password_rect.right + 5, password_rect.bottom), 2)
 
 			# Draw error message if any
 			if sign_in_error:
 				error_text = FONT_ARIAL.render(sign_in_error, True, (255, 0, 0))  # Keep error in red
-				error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + spacing * 3))
+				error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery - 105))
 				screen.blit(error_text, error_rect)
 
 			# Add instruction text
 			instruction_guest = FONT_ARIAL.render("Enter [Guest] in USERNAME to play as [Guest].", True, (0, 0, 0))
-			guest_rect = instruction_guest.get_rect(center=(panel_rect.centerx, panel_rect.centery + 75))
+			guest_rect = instruction_guest.get_rect(center=(panel_rect.centerx, panel_rect.centery + 85))
 			screen.blit(instruction_guest, guest_rect)
 			instruction_text = FONT_ARIAL.render("Press TAB to switch fields, ENTER to confirm.", True, (0, 0, 0))  
-			instruction_rect = instruction_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 125))
+			instruction_rect = instruction_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 135))
 			screen.blit(instruction_text, instruction_rect)
 
 		pg.display.flip()
