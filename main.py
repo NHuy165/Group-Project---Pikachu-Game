@@ -454,8 +454,8 @@ def start_screen():
 		
 
 		# Player status text
-		display_name = "[Guest]"
-		USER_BACKGROUND = pg.transform.scale(USER_BACKGROUND, (len(display_name)*20 + 160, 72))
+		display_name = current_player
+		USER_BACKGROUND = pg.transform.scale(USER_BACKGROUND, (len(display_name)*20 + 180, 72))
 		user_background_rect = USER_BACKGROUND.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT - image_height) // 2 + 60))
 		screen.blit(USER_BACKGROUND, user_background_rect)
 		player_text = FONT_ARIAL.render(f"Playing as {display_name}", True, (0, 0, 0))
@@ -606,15 +606,37 @@ def start_screen():
 			screen.blit(WARNING_PANEL, warning_rect)
 			proceed_rect = PROCEED_BUTTON.get_rect(center=(warning_rect.centerx, warning_rect.bottom - 50))
 			screen.blit(PROCEED_BUTTON, proceed_rect)
+
+			# Add exit button
+			exit_rect = EXIT_IMAGE.get_rect(topright=(warning_rect.right - 10, warning_rect.top + 30))
+			screen.blit(EXIT_IMAGE, exit_rect)
 			
 			if proceed_rect.collidepoint(mouse_x, mouse_y):
 				if pg.mouse.get_pressed()[0]:
 					return "new_game"
+			elif exit_rect.collidepoint(mouse_x, mouse_y):
+				draw_dark_image(EXIT_IMAGE, exit_rect, (60, 60, 60))
+				if pg.mouse.get_pressed()[0]:
+					show_warning = False
+					click_sound.play()
 
 		if show_sign_in:
 			show_dim_screen()
 			panel_rect = SIGN_IN_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 			screen.blit(SIGN_IN_PANEL, panel_rect)
+
+			# Add exit button
+			exit_rect = EXIT_IMAGE.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
+			screen.blit(EXIT_IMAGE, exit_rect)
+
+			if exit_rect.collidepoint(mouse_x, mouse_y):
+				draw_dark_image(EXIT_IMAGE, exit_rect, (60, 60, 60))
+				if pg.mouse.get_pressed()[0]:
+					show_sign_in = False
+					sign_in_error = ""  # Clear any error messages
+					name_input = ""     # Clear input fields
+					password_input = ""
+					click_sound.play()
 
 			# Draw labels
 			username_label = FONT_ARIAL.render("USERNAME:", True, (0, 0, 0))  # Changed to black
