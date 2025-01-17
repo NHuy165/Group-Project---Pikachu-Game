@@ -18,9 +18,9 @@ screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 LIST_BACKGROUND = [pg.transform.scale(pg.image.load("assets/images/background/" + str(i) + ".jpg"), (SCREEN_WIDTH, SCREEN_HEIGHT)) for i in range(10)]
 
 # Board configuration:
-BOARD_ROW = 9 #7
-BOARD_COLUMN = 14 #12
-NUM_TILE_ON_BOARD = 21
+BOARD_ROW = 7 #7
+BOARD_COLUMN = 12 #12
+NUM_TILE_ON_BOARD = 33
 NUM_SAME_TILE = 4
 
 TILE_WIDTH = 50
@@ -578,10 +578,16 @@ def start_screen():
 					if verify_player(name_input, password_input):
 						current_player = name_input
 						show_sign_in = False
+						name_input = ""
+						password_input = ""
+						sign_in_error = ""
 					else:
 						if add_player(name_input, password_input):
 							current_player = name_input
 							show_sign_in = False
+							name_input = ""
+							password_input = ""
+							sign_in_error = ""
 						else:
 							if name_input == "[Guest]":
 								sign_in_error = "Leave password blank to play as [Guest]"
