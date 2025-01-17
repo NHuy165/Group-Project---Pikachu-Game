@@ -597,6 +597,15 @@ def start_screen():
 						level = players[current_player]["save"][1]
 						lives = players[current_player]["save"][2]
 						remaining_time = players[current_player]["save"][3]
+
+						BOARD_ROW = len(board)
+						BOARD_COLUMN = len(board[0])
+						NUM_TILE_ON_BOARD = 21 if BOARD_ROW != 7 else 25
+						NUM_SAME_TILE = (BOARD_ROW*BOARD_COLUMN) // NUM_TILE_ON_BOARD
+
+						MARGIN_X = (SCREEN_WIDTH - TILE_WIDTH * BOARD_COLUMN) // 2
+						MARGIN_Y = (SCREEN_HEIGHT - TILE_HEIGHT * BOARD_ROW) // 2 + 15
+
 						return 
 					
 
@@ -909,7 +918,14 @@ def playing():
 		# check event
 		for event in pg.event.get():
 			if event.type == pg.QUIT: 
+				current_time = time.time()
+				if time_start_paused:
+					time_paused += current_time - time_start_paused
+				elapsed_time = current_time - start_time - time_paused
+				curr_remaining_time = GAME_TIME - elapsed_time + bonus_time
+				
 				update_players(board, level, lives, curr_remaining_time, remaining_time)
+ 
 
 				pg.quit()
 				sys.exit()
