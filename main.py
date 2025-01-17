@@ -20,8 +20,8 @@ LIST_BACKGROUND = [pg.transform.scale(pg.image.load("assets/images/background/" 
 
 BOARD_ROW = None
 BOARD_COLUMN = None
-NUM_TILE_ON_BOARD = 33
-NUM_SAME_TILE = 4
+NUM_TILE_ON_BOARD = None
+NUM_SAME_TILE = None
 
 TILE_WIDTH = 50
 TILE_HEIGHT = 55                                                                                           
@@ -95,7 +95,6 @@ current_player = "[Guest]"
 
 
 TIME_END = 6
-show_instruction = False
 
 RESET_BUTTON = pg.image.load("assets/images/button/replay.png")
 
@@ -121,6 +120,22 @@ game_over_sound.set_volume(0.2)
 current_hint = None  # Will store the current hint tiles
 show_hint = False   # Flag to control hint visibility
 
+# Initialize game info:
+board = None
+lives = 3
+level = 1
+remaining_time = GAME_TIME
+curr_remaining_time = GAME_TIME
+
+# Resets game info:
+def reset_game_info():
+	global board, lives, level, remaining_time, curr_remaining_time
+	board = None
+	lives = 3
+	level = 1
+	remaining_time = GAME_TIME
+	curr_remaining_time = GAME_TIME
+
 # Gets top-left corner coordinates of a tile based on its row (i) and column (j):
 def get_left_top_coords(i, j): 
 	x = j * TILE_WIDTH + MARGIN_X
@@ -139,9 +154,9 @@ def get_index_at_mouse(x, y):
 
 # Generates a random shuffled game board:
 def get_random_board():
-	list_index_tiles = list(range(1, NUM_TILE + 1)) #21
+	list_index_tiles = list(range(1, NUM_TILE + 1)) 
 	random.shuffle(list_index_tiles)
-	list_index_tiles = list_index_tiles[:NUM_TILE_ON_BOARD] * NUM_SAME_TILE #84
+	list_index_tiles = list_index_tiles[:NUM_TILE_ON_BOARD] * NUM_SAME_TILE 
 	random.shuffle(list_index_tiles)
 	board = [[0 for _ in range(BOARD_COLUMN)]for _ in range(BOARD_ROW)]
 	k = 0
@@ -149,6 +164,7 @@ def get_random_board():
 		for j in range(1, BOARD_COLUMN - 1):
 			board[i][j] = list_index_tiles[k]
 			k += 1
+	print(board)
 	return board
 
 # Draws game board:
@@ -195,18 +211,23 @@ def draw_hint(hint):
 		pg.draw.rect(screen, (0, 255, 0),(x - +1, y - 2, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
 
 # Draws a time bar:
-def draw_time_bar(start_time, bouns_time):
-	global time_start_paused, time_paused
+def draw_time_bar(start_time, bonus_time):
+	global time_start_paused, time_paused, curr_remaining_time
 	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2, border_radius = 20)
-	timeOut = 1 - (time.time() - start_time - bouns_time - time_paused) / GAME_TIME # ratio between remaining time and total time
+	current_time = time.time()
+	 # ratio between remaining time and total time
 	if paused:
-		if not time_start_paused: time_start_paused = time.time()
-		timeOut = 1 - (time_start_paused - start_time - bouns_time - time_paused) / GAME_TIME
+		if not time_start_paused: 
+			time_start_paused = time.time()
+
 	else:
 		if time_start_paused:
-			time_paused += time.time() - time_start_paused
-			timeOut = 1 - (time.time() - start_time - bouns_time - time_paused) / GAME_TIME
+			time_paused += current_time - time_start_paused
 		time_start_paused = 0
+
+		curr_remaining_time = GAME_TIME - (current_time - start_time - time_paused) + bonus_time
+
+	timeOut = (curr_remaining_time - (GAME_TIME - remaining_time)) / GAME_TIME
 
 	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
 	innerSize = (TIME_BAR_WIDTH * timeOut - 4, TIME_BAR_HEIGHT - 4)
@@ -235,13 +256,13 @@ def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
 	if pause_rect.collidepoint(mouse_x, mouse_y):
 		if not paused: 
 			draw_dark_image(PAUSE_BUTTON, pause_rect, (60, 60, 60))
-		if mouse_clicked:
-			mouse_clicked = False
-			paused = True
-			click_sound.play()
+			if mouse_clicked:
+				mouse_clicked = False
+				paused = True
+				click_sound.play()
 	return mouse_clicked
 
-# Draws hint button: (MỚI THÊM VÀO:)
+# Draws hint button: 
 def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
     global current_hint, show_hint
     hint_rect = pg.Rect(0, 0, *HINT_BUTTON.get_size())
@@ -260,7 +281,7 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
                 screen.blit(reshuffle_text, text_rect)
                 pg.display.flip()
                 pg.time.wait(3000)  # Show message for 1 second
-                current_hint = get_hint(board)
+
             show_hint = True
             click_sound.play()
     return mouse_clicked
@@ -349,13 +370,16 @@ def reset_board(board):
 	return board
 
 # Checks if the player has run out of time:
-def check_time(start_time, bouns_time):
-	global lives, level, paused, time_start_paused, time_paused
-	if paused: return 2	
+def check_time():
+	global lives, paused, remaining_time, curr_remaining_time
+	if paused: 
+		return 2	
 	# check game lost
-	if time.time() - start_time - time_paused > GAME_TIME + bouns_time: # time up
+	if curr_remaining_time - (GAME_TIME - remaining_time) < 0: # time up
 		paused = True
-		if lives <= 1: return 0
+		curr_remaining_time = remaining_time = GAME_TIME
+		if lives <= 0: 
+			return 0
 		return 1
 	return 2
 
@@ -372,9 +396,11 @@ def panel_pause(mouse_x, mouse_y, mouse_clicked):
 	panel_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 	screen.blit(PAUSE_PANEL_IMAGE, panel_rect)
 
+	# Continue
 	continue_rect = pg.Rect(0, 0, *CONTINUE_BUTTON.get_size())
 	continue_rect.center = (panel_rect.centerx, panel_rect.centery)
 	screen.blit(CONTINUE_BUTTON, continue_rect)
+
 	if continue_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(CONTINUE_BUTTON, continue_rect, (60, 60, 60))
 		if mouse_clicked:
@@ -383,9 +409,11 @@ def panel_pause(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 			return 2
 
+	# Replay
 	replay_rect = pg.Rect(0, 0, *REPLAY_BUTTON.get_size())
 	replay_rect.center = (panel_rect.centerx - 80, panel_rect.centery)
 	screen.blit(REPLAY_BUTTON, replay_rect)
+
 	if replay_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(REPLAY_BUTTON, replay_rect, (60, 60, 60))
 		if mouse_clicked:
@@ -393,9 +421,11 @@ def panel_pause(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 			return 0
 
+	# Home
 	home_rect = pg.Rect(0, 0, *HOME_BUTTON.get_size())
 	home_rect.center = (panel_rect.centerx + 80, panel_rect.centery)
 	screen.blit(HOME_BUTTON, home_rect)
+
 	if home_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
 		if mouse_clicked:
@@ -422,7 +452,18 @@ def load_players():
 
 def save_players(players):
     with open('players.json', 'w') as f:
-        json.dump(players, f)
+        json.dump(players, f, indent = 2)
+
+def update_players(board, level, lives, curr_remaining_time, remaining_time):
+	global current_player
+	if current_player != "[Guest]":
+		players = load_players()
+		players[current_player]["save"][0] = board
+		players[current_player]["save"][1] = level
+		players[current_player]["save"][2] = lives
+		players[current_player]["save"][3] = curr_remaining_time - (GAME_TIME - remaining_time)
+		save_players(players)
+
 
 def verify_player(name, password):
     players = load_players()
@@ -433,15 +474,17 @@ def verify_player(name, password):
 def add_player(name, password):
     players = load_players()
     if name not in players:
-        players[name] = {"password": password}
+        players[name] = {"password": password, "save": [None, 1, 3, GAME_TIME]}
         save_players(players)
         return True
     return False
 
 # Displays the starting screen:
 def start_screen():
-	global sound_on, music_on, show_instruction, current_player, USER_BACKGROUND, BOARD_ROW, BOARD_COLUMN, MARGIN_X, MARGIN_Y
-	show_warning = False
+	global sound_on, music_on, current_player, USER_BACKGROUND, BOARD_ROW, BOARD_COLUMN, NUM_SAME_TILE, NUM_TILE_ON_BOARD, MARGIN_X, MARGIN_Y, board, lives, level, remaining_time, curr_remaining_time
+	show_warning_guest = False
+	show_warning_saveless = False
+	show_instruction = False
 	show_sign_in = False
 	show_select_size = False
 	mouse_clicked = False
@@ -450,6 +493,7 @@ def start_screen():
 	name_input = ""
 	password_input = ""
 	input_active = "name"  # or "password"
+	players = load_players()
 	while True:
 		
 		Time.tick(FPS)
@@ -497,7 +541,7 @@ def start_screen():
 		info_rect = pg.Rect(SCREEN_WIDTH - 15 - image_width, SCREEN_HEIGHT - 15 - image_height, image_width, image_height)
 		screen.blit(INFO_IMAGE, info_rect)
 
-		panel_open = (show_instruction, show_warning, show_select_size, show_sign_in) # Checks if any panel is currently open
+		panel_open = (show_instruction, show_warning_guest, show_warning_saveless, show_select_size, show_sign_in) # Checks if any panel is currently open
 		mouse_x, mouse_y = pg.mouse.get_pos()
 
 		# Check collide with mouse:
@@ -537,7 +581,7 @@ def start_screen():
 				if new_game_rect.collidepoint(mouse_x, mouse_y) and not any(panel_open):
 					click_sound.play()
 					if current_player == "[Guest]":
-						show_warning = True
+						show_warning_guest = True
 					else:
 						show_select_size = True
 					mouse_clicked = False
@@ -545,8 +589,17 @@ def start_screen():
 				# Continue button clicked
 				elif continue_rect.collidepoint(mouse_x, mouse_y) and not any(panel_open) and current_player != "[Guest]":
 					click_sound.play()
-					return "continue"
-					# No need to reset mouse_clicked
+					if players[current_player]["save"][0] is None: # If no board saved
+						show_warning_saveless = True
+						mouse_clicked = False
+					else:
+						board = players[current_player]["save"][0]
+						level = players[current_player]["save"][1]
+						lives = players[current_player]["save"][2]
+						remaining_time = players[current_player]["save"][3]
+						return 
+					
+
                 
 				# Sign in button clicked
 				elif sign_in_rect.collidepoint(mouse_x, mouse_y) and not any(panel_open):
@@ -576,14 +629,6 @@ def start_screen():
 					show_instruction = True
 					click_sound.play()
 					mouse_clicked = False
-					
-				# Exit button clicked
-				elif exit_rect.collidepoint(mouse_x, mouse_y) and not any(panel_open):
-					show_instruction = False
-					click_sound.play()
-					mouse_clicked = False
-
-				
 			
 			# Taking input from user if signing in:     
 			if event.type == pg.KEYDOWN and show_sign_in:
@@ -603,6 +648,7 @@ def start_screen():
 							name_input = ""
 							password_input = ""
 							sign_in_error = ""
+							players = load_players() # Update list of players
 						else:
 							if name_input == "[Guest]":
 								sign_in_error = "Leave password blank to play as [Guest]"
@@ -635,8 +681,9 @@ def start_screen():
 					mouse_clicked = False
 					show_instruction = False
 					click_sound.play()
-		# Warning panel:
-		if show_warning:
+
+		# Warning saveless panel:
+		if show_warning_saveless:
 			show_dim_screen()
 			warning_rect = WARNING_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 			screen.blit(WARNING_PANEL, warning_rect)
@@ -651,17 +698,42 @@ def start_screen():
 				if mouse_clicked:
 					mouse_clicked = False
 					show_select_size = True
-					show_warning = False
+					show_warning_saveless = False
 					click_sound.play()
 			elif exit_rect.collidepoint(mouse_x, mouse_y):
 				draw_dark_image(EXIT_IMAGE, exit_rect, (60, 60, 60))
 				if mouse_clicked:
 					mouse_clicked = False
-					show_warning = False
+					show_warning_saveless = False
+					click_sound.play()
+
+		# Warning guest panel:
+		if show_warning_guest:
+			show_dim_screen()
+			warning_rect = WARNING_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+			screen.blit(WARNING_PANEL, warning_rect)
+			proceed_rect = PROCEED_BUTTON.get_rect(center=(warning_rect.centerx, warning_rect.bottom - 50))
+			screen.blit(PROCEED_BUTTON, proceed_rect)
+
+			exit_rect = EXIT_IMAGE.get_rect(topright=(warning_rect.right - 10, warning_rect.top + 30))
+			screen.blit(EXIT_IMAGE, exit_rect)
+			
+			if proceed_rect.collidepoint(mouse_x, mouse_y):
+				draw_dark_image(PROCEED_BUTTON, proceed_rect, (60, 60, 60))
+				if mouse_clicked:
+					mouse_clicked = False
+					show_select_size = True
+					show_warning_guest = False
+					click_sound.play()
+			elif exit_rect.collidepoint(mouse_x, mouse_y):
+				draw_dark_image(EXIT_IMAGE, exit_rect, (60, 60, 60))
+				if mouse_clicked:
+					mouse_clicked = False
+					show_warning_guest = False
 					click_sound.play()
 		
 		# Select board size panel:
-		elif show_select_size:
+		if show_select_size:
 			
 			# Board configuration:
 			# Small: 5 x 10
@@ -689,6 +761,8 @@ def start_screen():
 					mouse_clicked = False
 					BOARD_ROW = 7
 					BOARD_COLUMN = 12
+					NUM_TILE_ON_BOARD = 25
+					NUM_SAME_TILE = 2
 					start_game = True
 					click_sound.play()
 
@@ -698,6 +772,8 @@ def start_screen():
 					mouse_clicked = False
 					BOARD_ROW = 9
 					BOARD_COLUMN = 14
+					NUM_TILE_ON_BOARD = 21
+					NUM_SAME_TILE = 4
 					start_game = True
 					click_sound.play()
 
@@ -707,6 +783,8 @@ def start_screen():
 					mouse_clicked = False
 					BOARD_ROW = 11
 					BOARD_COLUMN = 16
+					NUM_TILE_ON_BOARD = 21
+					NUM_SAME_TILE = 6
 					start_game = True
 					click_sound.play()
 			
@@ -720,12 +798,11 @@ def start_screen():
 			if start_game:
 				MARGIN_X = (SCREEN_WIDTH - TILE_WIDTH * BOARD_COLUMN) // 2
 				MARGIN_Y = (SCREEN_HEIGHT - TILE_HEIGHT * BOARD_ROW) // 2 + 15
-				return "new_game"
-					
-			
+				board = get_random_board()
+				return
 		
 		# Sign in panel:
-		elif show_sign_in:
+		if show_sign_in:
 			show_dim_screen()
 			panel_rect = SIGN_IN_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 			screen.blit(SIGN_IN_PANEL, panel_rect)
@@ -792,21 +869,22 @@ def start_screen():
 
 # Handles the main game loop where gameplay occurs:
 def playing():
-	global level, lives, paused, time_start_paused, last_time_get_point, time_paused, show_hint, current_hint
+	global level, lives, paused, time_start_paused, time_paused, show_hint, current_hint, board, lives, level, remaining_time
+
+	# Time variables:
 	paused = False
+	curr_remaining_time = GAME_TIME - (GAME_TIME - remaining_time)
 	time_start_paused = 0
 	time_paused = 0
+	bonus_time = 0
+	start_time = time.time()
 
 	background = LIST_BACKGROUND[0] # get random background
-	board = get_random_board() # get ramdom board of game
 
 	mouse_x, mouse_y = 0, 0
 	clicked_tiles = [] # store index cards clicked
 	hint = get_hint(board)
-
-	last_time_get_point = time.time()
-	start_time = time.time()
-	bouns_time = 0
+	
 
 	while True:
 		Time.tick(FPS)
@@ -817,7 +895,7 @@ def playing():
 		screen.blit(dim_screen, (0, 0))
 		draw_board(board)
 		draw_lives(lives, level)
-		draw_time_bar(start_time, bouns_time)
+		draw_time_bar(start_time, bonus_time)
 		draw_clicked_tiles(board, clicked_tiles)
 
 		if show_hint and current_hint:
@@ -825,20 +903,16 @@ def playing():
 
 		mouse_clicked = False
 
-		if lives == 0:
-			show_dim_screen()
-			level = MAX_LEVEL + 1
-			game_over_sound.play()
-			pg.mixer.music.pause()
-			start_end = time.time()
-			while time.time() - start_end <= TIME_END:
-				screen.blit(GAMEOVER_BACKGROUND, (0, 0))
-				pg.display.flip()
-			return
+		if lives < 0:		
+			return "game_over"
 
 		# check event
 		for event in pg.event.get():
-			if event.type == pg.QUIT: pg.quit(), sys.exit()
+			if event.type == pg.QUIT: 
+				update_players(board, level, lives, curr_remaining_time, remaining_time)
+
+				pg.quit()
+				sys.exit()
 			if event.type == pg.MOUSEMOTION:
 				mouse_x, mouse_y = event.pos
 			if event.type == pg.MOUSEBUTTONDOWN:
@@ -850,10 +924,11 @@ def playing():
 					tile2_i, tile2_j = hint[1][0], hint[1][1]
 					board[tile1_i][tile1_j] = 0
 					board[tile2_i][tile2_j] = 0
-					bouns_time += 1
+					bonus_time += 1
 					update_difficulty(board, level, tile1_i, tile1_j, tile2_i, tile2_j)
 
-					if is_level_complete(board): return
+					if is_level_complete(board): 
+						return "next"
 
 					if not(board[tile1_i][tile1_j] != 0 and bfs(board, tile1_i, tile1_j, tile2_i, tile2_j)):
 						hint = get_hint(board)
@@ -861,33 +936,33 @@ def playing():
 							pg.time.wait(100)
 							reset_board(board)
 							hint = get_hint(board)
+
 		# Draw pause button
 		mouse_clicked = draw_pause_button(mouse_x, mouse_y, mouse_clicked)
+
 		# Draw hint button
 		mouse_clicked = draw_hint_button(mouse_x, mouse_y, mouse_clicked, board)
 		
 
-		is_time_up = check_time(start_time, bouns_time) # 0 if game over, 1 if lives -= 1, 2 if nothing
+		is_time_up = check_time() # 0 if game over, 1 if lives -= 1, 2 if nothing
   
 		if paused:
 			show_dim_screen()
 			if is_time_up == 0: #game over
-				lives -= 1
+				return "game_over"
 			elif is_time_up == 1:
-				lives -= 1
-				level -= 1
-				return
+				return "time_up"			
 					 
 			select = panel_pause(mouse_x, mouse_y, mouse_clicked) # 0 if click replay, 1 if click home, 2 if continue, 3 if nothing
-			if select == 0: 
+			if select == 0: # NEEDS TO BE EDITED
 				lives -= 1
 				if lives > 0:
 					level -= 1
 					return
 			elif select == 1:
-				level = MAX_LEVEL + 1
-				return 
-			elif select == 2: mouse_clicked = False # continue
+				return "start_screen"
+			elif select == 2: 
+				mouse_clicked = False # continue
 		
 		# update
 		try:
@@ -907,8 +982,7 @@ def playing():
 							success_sound.play(maxtime = 1500)
 							draw_path(path)
 
-							bouns_time += 1
-							last_time_get_point = time.time() # count time hint
+							bonus_time += 1
 
 					
 							show_hint = False  # Reset hint when tiles are matched
@@ -916,6 +990,7 @@ def playing():
 
 							# if level > 1, upgrade difficulty by moving cards 
 							update_difficulty(board, level, clicked_tiles[0][0], clicked_tiles[0][1], tile_i, tile_j)
+
 							if is_level_complete(board):
 								if level == 5:
 									pg.mixer.music.pause()
@@ -923,6 +998,7 @@ def playing():
 									alpha = 0
 									time_win = 10
 									tmp = time.time()
+									
 									win_sound.play(maxtime = 10000)
 									show_dim_screen()
 									while time.time() - tmp < 10:
@@ -932,7 +1008,9 @@ def playing():
 										tmp_image.set_alpha(alpha)
 										screen.blit(tmp_image, (180, 70))
 										pg.display.flip()
-								return
+									return "victory"
+
+								return "next"
 						
 						else:
 							if not (clicked_tiles[0][0] == clicked_tiles[1][0] and clicked_tiles[0][1] == clicked_tiles[1][1]):
@@ -946,22 +1024,44 @@ def playing():
 # Incorporates all the above functions to run the game: 
 def main():
 	#init pygame and module
-	global level, lives
+	global level, lives, board, curr_remaining_time, remaining_time
 	
 	while True:
-		level = 1
-		lives = 3
-		action = start_screen()
+		start_screen()
 
-		if action == "new_game":
-			while level <= MAX_LEVEL:
-				random.shuffle(LIST_BACKGROUND)
-				playing()
+		while level <= MAX_LEVEL:
+			random.shuffle(LIST_BACKGROUND)
+			signal = playing()
+			if signal == "start_screen":
+				update_players(board, level, lives, curr_remaining_time, remaining_time)
+				reset_game_info()
+				break
+			elif signal == "next":
+				board = get_random_board()
+				remaining_time = GAME_TIME
 				level += 1
 				pg.time.wait(300)
 				pg.mixer.music.play()
-		elif action == "continue":
-			pass
+			elif signal == "time_up":
+				lives -= 1
+				board = get_random_board()
+				remaining_time = GAME_TIME
+			elif signal == "game_over":
+				update_players(None, 1, 3, GAME_TIME, GAME_TIME)
+				show_dim_screen()
+				game_over_sound.play()
+				pg.mixer.music.pause()
+				start_end = time.time()
+				while time.time() - start_end <= TIME_END:
+					screen.blit(GAMEOVER_BACKGROUND, (0, 0))
+					pg.display.flip()
+				reset_game_info()
+				break
+			elif signal == "victory":
+				update_players(None, 1, 3, GAME_TIME, GAME_TIME)
+				reset_game_info()
+				break
+
 
 if __name__ == '__main__':
 	main()
