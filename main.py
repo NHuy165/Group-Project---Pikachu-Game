@@ -50,32 +50,32 @@ FONT_TUROK = pg.font.SysFont('timesnewroman', 60)
 FONT_PIKACHU = pg.font.Font("assets/font/pikachu.otf", 50)
 FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 30)
 
-# Non-interactive images:
-LIST_LEVEL = [pg.transform.scale(pg.image.load("assets/images/level/" + str(i) + ".png"), (50, 50)) for i in range(1, 10)]
-LIVES_IMAGE = pg.transform.scale(pg.image.load("assets/images/heart.png"), (50, 50))
-LOGO_IMAGE = pg.transform.scale(pg.image.load("assets/images/logo/logo_home.png"), (600, 200))
+# Backgrounds:
 START_SCREEN_BACKGOUND = pg.transform.scale(pg.image.load("assets/images/background/b1g.jpg"), (SCREEN_WIDTH, SCREEN_HEIGHT))
 GAMEOVER_BACKGROUND = pg.image.load("assets/images/button/gameover.png").convert_alpha()
 WIN_BACKGROUND = pg.image.load("assets/images/button/win1.png").convert_alpha()
 PAUSE_PANEL_IMAGE = pg.transform.scale(pg.image.load("assets/images/button/panel_pause.png"), (300, 200))
-SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"), (50, 50))
-INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
 USER_BACKGROUND = pg.image.load("assets/images/button/user_background.png")
 
-# Menu buttons:
+# Menu UI:
+LOGO_IMAGE = pg.transform.scale(pg.image.load("assets/images/logo/logo_home.png"), (600, 200))
 NEW_GAME_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/new_game.png"), (180, 72)).convert_alpha()
 CONTINUE_BUTTON_START = pg.transform.scale(pg.image.load("assets/images/button/continue_start.png"), (180, 72)).convert_alpha()
 SIGN_IN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sign_in.png"), (180, 72)).convert_alpha()
+REGISTER_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/register.png"), (180, 72)).convert_alpha()
 WARNING_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_panel.png"), (700, 469)).convert_alpha()
 SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
+REGISTER_PANEL = pg.transform.scale(pg.image.load("assets/images/button/register_panel.png"), (700, 469)).convert_alpha()
 PROCEED_BUTTON = pg.image.load("assets/images/button/proceed.png").convert_alpha()
 SIZE_SMALL_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_small.png"), (180, 72)).convert_alpha()
 SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_medium.png"), (180, 72)).convert_alpha()
 SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_large.png"), (180, 72)).convert_alpha()
 SELECT_SIZE_PANEL = pg.transform.scale(pg.image.load("assets/images/button/select_size_panel.png"), (700, 469)).convert_alpha()
 INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instruction.png"), (700, 469)).convert_alpha()
+SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"), (50, 50))
+INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
 
-# Game buttons:
+# Game UI:
 EXIT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/close.png"), (60, 60))
 REPLAY_BUTTON = pg.image.load("assets/images/button/replay.png")
 HOME_BUTTON = pg.image.load("assets/images/button/exit.png").convert_alpha()
@@ -83,6 +83,8 @@ PAUSE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/pause.png"
 HINT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/hint.png").convert_alpha(), (50, 50))
 CONTINUE_BUTTON = pg.image.load("assets/images/button/continue.png").convert_alpha()
 RESET_BUTTON = pg.image.load("assets/images/button/replay.png")
+LIST_LEVEL = [pg.transform.scale(pg.image.load("assets/images/level/" + str(i) + ".png"), (50, 50)) for i in range(1, 10)]
+LIVES_IMAGE = pg.transform.scale(pg.image.load("assets/images/heart.png"), (50, 50))
 
 # Background music:
 pg.mixer.music.load("assets/music/background1.mp3")
@@ -102,8 +104,10 @@ win_sound.set_volume(0.2)
 game_over_sound = pg.mixer.Sound("assets/sound/gameover.wav")
 game_over_sound.set_volume(0.2)
 
-# Initialize current player name:
+# Working with accounts:
 current_player = "[Guest]"
+NAME_LIMIT = 20
+PASSWORD_LIMIT = 20
 
 # Working with hints:
 current_hint = None  # Will store the current hint tiles
@@ -336,6 +340,20 @@ def draw_sign_in_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
+# Draws Register button:
+def draw_register_button(mouse_x, mouse_y, mouse_clicked):
+	global show_register
+
+	register_rect = REGISTER_BUTTON.get_rect(center=(SCREEN_WIDTH // 2,  635))
+	screen.blit(REGISTER_BUTTON, register_rect)
+	if register_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(REGISTER_BUTTON, register_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_register = True
+			click_sound.play()
+	return mouse_clicked
+
 # Draws sound button:
 def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
 	global sound_on
@@ -557,7 +575,6 @@ def update_players(board, level, lives, curr_remaining_time, remaining_time):
 		players[current_player]["save"][3] = curr_remaining_time - (GAME_TIME - remaining_time)
 		save_players(players)
 
-
 def verify_player(name, password):
     players = load_players()
     if name in players:
@@ -566,22 +583,21 @@ def verify_player(name, password):
 
 def add_player(name, password):
     players = load_players()
-    if name not in players:
-        players[name] = {"password": password, "save": [None, 1, 3, GAME_TIME]}
-        save_players(players)
-        return True
-    return False
+    players[name] = {"password": password, "save": [None, 1, 3, GAME_TIME]}
+    save_players(players)
+
 
 # Displays the starting screen:
 def start_screen():
 	global sound_on, music_on, current_player, USER_BACKGROUND, board_row, board_column, num_same_tile, num_tile_on_board, margin_x, margin_y, board, lives, level, remaining_time, curr_remaining_time
-	global show_warning_guest, show_warning_saveless, show_instruction, show_sign_in, show_select_size
+	global show_warning_guest, show_warning_saveless, show_instruction, show_sign_in, show_select_size, show_register
 
 	# Currently open panels:
 	show_warning_guest = False
 	show_warning_saveless = False
 	show_instruction = False
 	show_sign_in = False
+	show_register = False
 	show_select_size = False
 
 	# Signals:
@@ -635,35 +651,59 @@ def start_screen():
 				if event.key == pg.K_TAB:
 					input_active = "password" if input_active == "name" else "name"
 				elif event.key == pg.K_RETURN:
-					if verify_player(name_input, password_input):
+					if (name_input == "[Guest]" and password_input == "") or verify_player(name_input, password_input):
 						current_player = name_input
 						show_sign_in = False
 						name_input = ""
 						password_input = ""
 						sign_in_error = ""
 					else:
-						if add_player(name_input, password_input):
-							current_player = name_input
-							show_sign_in = False
-							name_input = ""
-							password_input = ""
-							sign_in_error = ""
-							players = load_players() # Update list of players
+						if name_input == "[Guest]":
+							sign_in_error = "Leave password blank to play as [Guest]"
+						elif name_input not in players:
+							sign_in_error = "Username not found"
 						else:
-							if name_input == "[Guest]":
-								sign_in_error = "Leave password blank to play as [Guest]"
-							else:
-								sign_in_error = "Incorrect password"
-							fail_sound.play()
+							sign_in_error = "Incorrect password"
+						fail_sound.play()
 				elif event.key == pg.K_BACKSPACE:
 					if input_active == "name":
 						name_input = name_input[:-1]
 					else:
 						password_input = password_input[:-1]
 				else:
-					if input_active == "name":
+					if input_active == "name" and len(name_input) < NAME_LIMIT:
 						name_input += event.unicode
+					elif input_active == "password" and len(password_input) < PASSWORD_LIMIT:
+						password_input += event.unicode
+      
+			# Taking input from user if registering:     
+			if event.type == pg.KEYDOWN and show_register:
+				if event.key == pg.K_TAB:
+					input_active = "password" if input_active == "name" else "name"
+				elif event.key == pg.K_RETURN:
+					if name_input in players:
+						sign_in_error = "Username already exists"
+						fail_sound.play()
+					else:	
+						if name_input == "[Guest]":
+							sign_in_error = "Cannot register as [Guest]"
+							fail_sound.play()
+						else:
+							add_player(name_input, password_input)
+							show_register = False
+							name_input = ""
+							password_input = ""
+							sign_in_error = ""
+							players = load_players()
+				elif event.key == pg.K_BACKSPACE:
+					if input_active == "name":
+						name_input = name_input[:-1]
 					else:
+						password_input = password_input[:-1]
+				else:
+					if input_active == "name" and len(name_input) < NAME_LIMIT:
+						name_input += event.unicode
+					elif input_active == "password" and len(password_input) < PASSWORD_LIMIT:
 						password_input += event.unicode
 
 
@@ -677,10 +717,14 @@ def start_screen():
 				return
 
 			mouse_clicked = draw_sign_in_button(mouse_x, mouse_y, mouse_clicked)
+   
+			mouse_clicked = draw_register_button(mouse_x, mouse_y, mouse_clicked)
 
 			mouse_clicked = draw_sound_button(mouse_x, mouse_y, mouse_clicked)
 
 			mouse_clicked = draw_info_button(mouse_x, mouse_y, mouse_clicked)
+   
+
 		
 		# Handles currently open panel: 
 		# Instruction panel:
@@ -879,6 +923,66 @@ def start_screen():
 			instruction_text = FONT_ARIAL.render("Press TAB to switch fields, ENTER to confirm.", True, (0, 0, 0))  
 			instruction_rect = instruction_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 135))
 			screen.blit(instruction_text, instruction_rect)
+
+		# Register panel:
+		if show_register:
+			show_dim_screen()
+			panel_rect = REGISTER_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+			screen.blit(REGISTER_PANEL, panel_rect)
+
+			# Add exit button
+			exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
+			screen.blit(EXIT_BUTTON, exit_rect)
+
+			if exit_rect.collidepoint(mouse_x, mouse_y):
+				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+				if mouse_clicked:
+					mouse_clicked = False
+					show_register = False
+					sign_in_error = ""  # Clear entered inputs
+					name_input = ""  
+					password_input = ""
+					click_sound.play()
+
+			# Draw labels
+			username_label = FONT_ARIAL.render("USERNAME:", True, (0, 0, 0))  # Changed to black
+			password_label = FONT_ARIAL.render("PASSWORD:", True, (0, 0, 0))  # Changed to black
+
+			# Position labels with reduced spacing
+			screen.blit(username_label, (panel_rect.centerx - 200, panel_rect.centery - 65))
+			screen.blit(password_label, (panel_rect.centerx - 200, panel_rect.centery - 5))
+
+			# Draw input fields and text
+			name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
+			password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
+
+			name_rect = name_text.get_rect(center=(panel_rect.centerx + 50, panel_rect.centery - 55))
+			password_rect = password_text.get_rect(center=(panel_rect.centerx + 50, panel_rect.centery + 5))
+
+			screen.blit(name_text, name_rect)
+			screen.blit(password_text, password_rect)
+
+			# Draw active input indicator
+			if input_active == "name":
+				pg.draw.line(screen, (0, 0, 0),  
+							(name_rect.right + 5, name_rect.top), 
+							(name_rect.right + 5, name_rect.bottom), 2)
+			else:
+				pg.draw.line(screen, (0, 0, 0), 
+							(password_rect.right + 5, password_rect.top), 
+							(password_rect.right + 5, password_rect.bottom), 2)
+
+			# Draw error message if any
+			if sign_in_error:
+				error_text = FONT_ARIAL.render(sign_in_error, True, (255, 0, 0))  # Keep error in red
+				error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery - 105))
+				screen.blit(error_text, error_rect)
+
+			# Add instruction text
+			instruction_text = FONT_ARIAL.render("Press TAB to switch fields, ENTER to confirm.", True, (0, 0, 0))  
+			instruction_rect = instruction_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 135))
+			screen.blit(instruction_text, instruction_rect)
+		
 
 		pg.display.flip()
 
