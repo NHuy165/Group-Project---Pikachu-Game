@@ -65,8 +65,8 @@ SIGN_IN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sign_in.
 REGISTER_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/register.png"), (180, 72)).convert_alpha()
 WARNING_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_panel.png"), (700, 469)).convert_alpha()
 WARNING_SAVELESS_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_saveless_panel.png"), (700, 469)).convert_alpha()
-SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
-REGISTER_PANEL = pg.transform.scale(pg.image.load("assets/images/button/register_panel.png"), (700, 469)).convert_alpha()
+SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (956, 500)).convert_alpha()
+REGISTER_PANEL = pg.transform.scale(pg.image.load("assets/images/button/register_panel.png"), (956, 500)).convert_alpha()
 PROCEED_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/proceed.png").convert_alpha(), (180, 72))
 SIZE_SMALL_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_small.png"), (373, 72)).convert_alpha()
 SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_medium.png"), (373, 72)).convert_alpha()
@@ -112,7 +112,7 @@ sound_on = True
 current_player = "[Guest]"
 NAME_LIMIT = 16
 PASSWORD_LIMIT = 16
-NAME_HITBOX_SIGN_IN = pg.Rect(587, 290, 256, 41)
+NAME_HITBOX_SIGN_IN = pg.Rect(577, 275, 256, 41)
 PASSWORD_HITBOX_SIGN_IN = pg.Rect(587, 381, 256, 41)
 NAME_HITBOX_REGISTER = pg.Rect(587, 280, 256, 41)
 PASSWORD_HITBOX_REGISTER = pg.Rect(587, 374, 256, 41)
@@ -930,10 +930,10 @@ def start_screen():
 			name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
 			password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
 
-			name_rect = name_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery - 50))
-			pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_SIGN_IN, 1)
-			password_rect = password_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery + 40))
-			pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_SIGN_IN, 1)
+			name_rect = name_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery - 55))
+			# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_SIGN_IN, 1)
+			password_rect = password_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery + 43))
+			# pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_SIGN_IN, 1)
 			
 			screen.blit(name_text, name_rect)
 			screen.blit(password_text, password_rect)
@@ -957,7 +957,7 @@ def start_screen():
 		# Register panel:
 		if show_register:
 			show_dim_screen()
-			panel_rect = REGISTER_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+			panel_rect = REGISTER_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
 			screen.blit(REGISTER_PANEL, panel_rect)
 
 			# Add exit button
@@ -981,10 +981,10 @@ def start_screen():
 			name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
 			password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
 
-			name_rect = name_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery - 50))
-			pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_REGISTER, 1)
-			password_rect = password_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery + 40))
-			pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_REGISTER, 1)
+			name_rect = name_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery - 65))
+			# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_REGISTER, 1)
+			password_rect = password_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery + 43))
+			# pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_REGISTER, 1)
 
 			screen.blit(name_text, name_rect)
 			screen.blit(password_text, password_rect)
