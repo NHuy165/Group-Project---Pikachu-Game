@@ -52,9 +52,9 @@ FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 30)
 
 # Backgrounds:
 START_SCREEN_BACKGOUND = pg.transform.scale(pg.image.load("assets/images/background/b1g.jpg"), (SCREEN_WIDTH, SCREEN_HEIGHT))
-GAMEOVER_BACKGROUND = pg.image.load("assets/images/button/gameover.png").convert_alpha()
-WIN_BACKGROUND = pg.image.load("assets/images/button/win1.png").convert_alpha()
-PAUSE_PANEL_IMAGE = pg.transform.scale(pg.image.load("assets/images/button/panel_pause.png"), (300, 200))
+GAMEOVER_BACKGROUND = pg.transform.scale(pg.image.load("assets/images/button/gameover.png").convert_alpha(), (1000, 600))
+WIN_BACKGROUND = pg.transform.scale(pg.image.load("assets/images/button/win1.png").convert_alpha(), (1000, 562))
+PAUSE_PANEL_IMAGE = pg.transform.scale(pg.image.load("assets/images/button/panel_pause.png"), (800, 600))
 USER_BACKGROUND = pg.image.load("assets/images/button/user_background.png")
 
 # Menu UI:
@@ -65,24 +65,24 @@ SIGN_IN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sign_in.
 REGISTER_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/register.png"), (180, 72)).convert_alpha()
 WARNING_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_panel.png"), (700, 469)).convert_alpha()
 SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
-REGISTER_PANEL = pg.transform.scale(pg.image.load("assets/images/button/register_panel.png"), (700, 469)).convert_alpha()
-PROCEED_BUTTON = pg.image.load("assets/images/button/proceed.png").convert_alpha()
-SIZE_SMALL_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_small.png"), (180, 72)).convert_alpha()
-SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_medium.png"), (180, 72)).convert_alpha()
-SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_large.png"), (180, 72)).convert_alpha()
+REGISTER_PANEL = pg.transform.scale(pg.image.load("assets/images/button/register_panel.png"), (800, 418)).convert_alpha()
+PROCEED_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/proceed.png").convert_alpha(), (180, 72))
+SIZE_SMALL_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_small.png"), (373, 72)).convert_alpha()
+SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_medium.png"), (373, 72)).convert_alpha()
+SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_large.png"), (373, 72)).convert_alpha()
 SELECT_SIZE_PANEL = pg.transform.scale(pg.image.load("assets/images/button/select_size_panel.png"), (700, 469)).convert_alpha()
-INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instruction.png"), (700, 469)).convert_alpha()
+INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instruction.png"), (760, 469)).convert_alpha()
 SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"), (50, 50))
 INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
 
 # Game UI:
 EXIT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/close.png"), (60, 60))
-REPLAY_BUTTON = pg.image.load("assets/images/button/replay.png")
-HOME_BUTTON = pg.image.load("assets/images/button/exit.png").convert_alpha()
+REPLAY_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/replay.png"), (50, 50))
+HOME_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/exit.png").convert_alpha(), (50, 50))
 PAUSE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/pause.png").convert_alpha(), (50, 50))
 HINT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/hint.png").convert_alpha(), (50, 50))
-CONTINUE_BUTTON = pg.image.load("assets/images/button/continue.png").convert_alpha()
-RESET_BUTTON = pg.image.load("assets/images/button/replay.png")
+CONTINUE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/continue.png").convert_alpha(), (50, 50))
+RESET_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/replay.png"), (50, 50))
 LIST_LEVEL = [pg.transform.scale(pg.image.load("assets/images/level/" + str(i) + ".png"), (50, 50)) for i in range(1, 10)]
 LIVES_IMAGE = pg.transform.scale(pg.image.load("assets/images/heart.png"), (50, 50))
 
@@ -1220,7 +1220,8 @@ def main():
 				pg.mixer.music.pause()
 				start_end = time.time()
 				while time.time() - start_end <= TIME_END:
-					screen.blit(GAMEOVER_BACKGROUND, (0, 0))
+					gameover_width, gameover_height = GAMEOVER_BACKGROUND.get_size()
+					screen.blit(GAMEOVER_BACKGROUND, (SCREEN_WIDTH // 2 - gameover_width // 2, SCREEN_HEIGHT // 2 - gameover_height // 2))
 					pg.display.flip()
 				reset_game_info()
 				break
