@@ -55,7 +55,6 @@ START_SCREEN_BACKGOUND = pg.transform.scale(pg.image.load("assets/images/backgro
 GAMEOVER_BACKGROUND = pg.transform.scale(pg.image.load("assets/images/button/gameover.png").convert_alpha(), (1000, 600))
 WIN_BACKGROUND = pg.transform.scale(pg.image.load("assets/images/button/win1.png").convert_alpha(), (1000, 562))
 PAUSE_PANEL_IMAGE = pg.transform.scale(pg.image.load("assets/images/button/panel_pause.png"), (800, 600))
-USER_BACKGROUND = pg.image.load("assets/images/button/user_background.png")
 
 # Menu UI:
 LOGO_IMAGE = pg.transform.scale(pg.image.load("assets/images/logo/logo_home.png"), (600, 200))
@@ -63,11 +62,12 @@ NEW_GAME_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/new_gam
 CONTINUE_BUTTON_START = pg.transform.scale(pg.image.load("assets/images/button/continue_start.png"), (180, 72)).convert_alpha()
 SIGN_IN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sign_in.png"), (180, 72)).convert_alpha()
 REGISTER_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/register.png"), (180, 72)).convert_alpha()
-WARNING_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_panel.png"), (700, 469)).convert_alpha()
+PROCEED_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/proceed.png").convert_alpha(), (180, 72))
+WARNING_GUEST_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_guest_panel.png"), (700, 469)).convert_alpha()
 WARNING_SAVELESS_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_saveless_panel.png"), (700, 469)).convert_alpha()
+SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
 SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (956, 500)).convert_alpha()
 REGISTER_PANEL = pg.transform.scale(pg.image.load("assets/images/button/register_panel.png"), (956, 500)).convert_alpha()
-PROCEED_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/proceed.png").convert_alpha(), (180, 72))
 SIZE_SMALL_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_small.png"), (373, 72)).convert_alpha()
 SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_medium.png"), (373, 72)).convert_alpha()
 SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_large.png"), (373, 72)).convert_alpha()
@@ -110,12 +110,13 @@ sound_on = True
 
 # Working with sign-in and register systems:
 current_player = "[Guest]"
-NAME_LIMIT = 16
-PASSWORD_LIMIT = 16
-NAME_HITBOX_SIGN_IN = pg.Rect(577, 275, 256, 41)
-PASSWORD_HITBOX_SIGN_IN = pg.Rect(587, 381, 256, 41)
-NAME_HITBOX_REGISTER = pg.Rect(587, 280, 256, 41)
-PASSWORD_HITBOX_REGISTER = pg.Rect(587, 374, 256, 41)
+user_background = pg.image.load("assets/images/button/user_background.png")
+NAME_LIMIT = 20
+PASSWORD_LIMIT = 20
+NAME_HITBOX_SIGN_IN = pg.Rect(570, 286, 345, 41)
+PASSWORD_HITBOX_SIGN_IN = pg.Rect(570, 383, 345, 41)
+NAME_HITBOX_REGISTER = pg.Rect(570, 295, 345, 42)
+PASSWORD_HITBOX_REGISTER = pg.Rect(570, 395, 345, 42)
 
 
 # Working with hints:
@@ -533,10 +534,279 @@ def show_dim_screen():
 	dim_screen = pg.Surface(screen.get_size(), pg.SRCALPHA)
 	pg.draw.rect(dim_screen, (0, 0, 0, 220), dim_screen.get_rect())
 	screen.blit(dim_screen, (0, 0))
+
+# Displays the instruction panel:
+def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
+	show_dim_screen()
+	instruct_rect = INSTRUCTION_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	screen.blit(INSTRUCTION_PANEL, instruct_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(instruct_rect.right - 10, instruct_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_instruction = True
+
+	if exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_instruction = False
+			click_sound.play()
+	return mouse_clicked, show_instruction
+
+# Displays the saveless warning panel:
+def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
+	show_dim_screen()
+	warning_saveless_rect = WARNING_SAVELESS_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	screen.blit(WARNING_SAVELESS_PANEL, warning_saveless_rect)
+	proceed_rect = PROCEED_BUTTON.get_rect(center=(warning_saveless_rect.centerx, warning_saveless_rect.bottom - 50))
+	screen.blit(PROCEED_BUTTON, proceed_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(warning_saveless_rect.right - 10, warning_saveless_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_warning_saveless = True
+	show_select_size = False
 	
-# Displays the pause menu:
-def panel_pause(mouse_x, mouse_y, mouse_clicked):
-	global lives, show_paused
+	if proceed_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(PROCEED_BUTTON, proceed_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_select_size = True
+			show_warning_saveless = False
+			click_sound.play()
+	elif exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_warning_saveless = False
+			click_sound.play()
+
+	return mouse_clicked, show_warning_saveless, show_select_size
+
+def draw_panel_warning_guest(mouse_x, mouse_y, mouse_clicked): 
+	show_dim_screen()
+	warning_guest_rect = WARNING_GUEST_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	screen.blit(WARNING_GUEST_PANEL, warning_guest_rect)
+	proceed_rect = PROCEED_BUTTON.get_rect(center=(warning_guest_rect.centerx, warning_guest_rect.bottom - 50))
+	screen.blit(PROCEED_BUTTON, proceed_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(warning_guest_rect.right - 10, warning_guest_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_warning_guest = True
+	show_select_size = False
+	
+	if proceed_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(PROCEED_BUTTON, proceed_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_select_size = True
+			show_warning_guest = False
+			click_sound.play()
+	elif exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_warning_guest = False
+			click_sound.play()
+
+	return mouse_clicked, show_warning_guest, show_select_size
+
+def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input, password_input, error):
+	show_dim_screen()
+	panel_rect = SIGN_IN_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	screen.blit(SIGN_IN_PANEL, panel_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_sign_in = True
+
+	if exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_sign_in = False
+			error = ""  
+			name_input = ""  
+			password_input = ""
+			click_sound.play()
+
+	elif NAME_HITBOX_SIGN_IN.collidepoint(mouse_x, mouse_y) and mouse_clicked:
+		mouse_clicked = False
+		input_active = "name"
+
+	elif PASSWORD_HITBOX_SIGN_IN.collidepoint(mouse_x, mouse_y) and mouse_clicked:
+		mouse_clicked = False
+		input_active = "password"
+		
+
+	# Draw input fields and text
+	name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
+	password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
+
+	name_rect = name_text.get_rect(center=(panel_rect.centerx + 102, panel_rect.centery - 54))
+	# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_SIGN_IN, 1)
+	password_rect = password_text.get_rect(center=(panel_rect.centerx + 102, panel_rect.centery + 43))
+	# pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_SIGN_IN, 1)
+	
+	screen.blit(name_text, name_rect)
+	screen.blit(password_text, password_rect)
+
+	# Draw active input indicator
+	if input_active == "name":
+		pg.draw.line(screen, (0, 0, 0),  
+					(name_rect.right + 5, name_rect.top + 1), 
+					(name_rect.right + 5, name_rect.bottom - 2), 2)
+	else:
+		pg.draw.line(screen, (0, 0, 0), 
+					(password_rect.right + 5, password_rect.top + 1), 
+					(password_rect.right + 5, password_rect.bottom - 2), 2)
+
+	# Draw error message if any
+	if error:
+		error_text = FONT_ARIAL.render(error, True, (255, 0, 0)) 
+		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 150))
+		screen.blit(error_text, error_rect)
+
+	return mouse_clicked, input_active, name_input, password_input, show_sign_in
+
+def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_input, password_input, error):
+	show_dim_screen()
+	panel_rect = REGISTER_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+	screen.blit(REGISTER_PANEL, panel_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_register = True
+
+	if exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_register = False
+			error = "" 
+			name_input = ""  
+			password_input = ""
+			click_sound.play()
+
+	if NAME_HITBOX_REGISTER.collidepoint(mouse_x, mouse_y) and mouse_clicked:
+		mouse_clicked = False
+		input_active = "name"
+
+	if PASSWORD_HITBOX_REGISTER.collidepoint(mouse_x, mouse_y) and mouse_clicked:
+		mouse_clicked = False
+		input_active = "password"
+
+	# Draw input fields and text
+	name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
+	password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
+
+	name_rect = name_text.get_rect(center=(panel_rect.centerx + 102, panel_rect.centery - 64))
+	# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_REGISTER, 1)
+	password_rect = password_text.get_rect(center=(panel_rect.centerx + 102, panel_rect.centery + 36))
+	# pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_REGISTER, 1)
+
+	screen.blit(name_text, name_rect)
+	screen.blit(password_text, password_rect)
+
+	# Draw active input indicator
+	if input_active == "name":
+		pg.draw.line(screen, (0, 0, 0),  
+					(name_rect.right + 5, name_rect.top + 0), 
+					(name_rect.right + 5, name_rect.bottom - 2), 2)
+	else:
+		pg.draw.line(screen, (0, 0, 0), 
+					(password_rect.right + 5, password_rect.top + 1), 
+					(password_rect.right + 5, password_rect.bottom - 2), 2)
+
+	# Draw error message if any
+	if error:
+		error_text = FONT_ARIAL.render(error, True, (255, 0, 0)) 
+		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 105))
+		screen.blit(error_text, error_rect)
+
+	return mouse_clicked, input_active, name_input, password_input, show_register
+
+def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
+	global board_row, board_column, num_tile_on_board, num_same_tile, margin_x, margin_y, board
+
+	# Board configuration:
+	# Small: 5 x 10
+	# Medium: 7 x 12
+	# Large: 9 x 14
+	# True row and column are board_row - 2 and board_column - 2
+
+	show_dim_screen()
+	select_size_rect = SELECT_SIZE_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	screen.blit(SELECT_SIZE_PANEL, select_size_rect)
+
+	small_rect = SIZE_SMALL_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.top + 150))
+	screen.blit(SIZE_SMALL_BUTTON, small_rect)
+	medium_rect = SIZE_MEDIUM_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.centery))
+	screen.blit(SIZE_MEDIUM_BUTTON, medium_rect)
+	large_rect = SIZE_LARGE_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.bottom - 150))
+	screen.blit(SIZE_LARGE_BUTTON, large_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(select_size_rect.right - 10, select_size_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_select_size = True
+
+	start_game = False
+
+	if small_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(SIZE_SMALL_BUTTON, small_rect, (60, 60, 60))
+		if mouse_clicked:
+			board_row = 7
+			board_column = 12
+			num_tile_on_board = 25
+			num_same_tile = 2
+			start_game = True
+			click_sound.play()
+
+	elif medium_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(SIZE_MEDIUM_BUTTON, medium_rect, (60, 60, 60))
+		if mouse_clicked:
+			board_row = 9
+			board_column = 14
+			num_tile_on_board = 21
+			num_same_tile = 4
+			start_game = True
+			click_sound.play()
+
+	elif large_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(SIZE_LARGE_BUTTON, large_rect, (60, 60, 60))
+		if mouse_clicked:
+			board_row = 11
+			board_column = 16
+			num_tile_on_board = 21
+			num_same_tile = 6
+			start_game = True
+			click_sound.play()
+
+	elif exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_select_size = False
+			click_sound.play()
+
+	if start_game:
+		margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
+		margin_y = (SCREEN_HEIGHT - TILE_HEIGHT * board_row) // 2 + 15
+		board = get_random_board()
+		return "start_game"
+	
+	return mouse_clicked, show_select_size
+
+# Displays the pause panel:
+def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
+	global lives
+ 
+	show_dim_screen()
 	panel_rect = pg.Rect(0, 0, *PAUSE_PANEL_IMAGE.get_size())
 	panel_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 	screen.blit(PAUSE_PANEL_IMAGE, panel_rect)
@@ -545,40 +815,42 @@ def panel_pause(mouse_x, mouse_y, mouse_clicked):
 	continue_rect = pg.Rect(0, 0, *CONTINUE_BUTTON.get_size())
 	continue_rect.center = (panel_rect.centerx, panel_rect.centery)
 	screen.blit(CONTINUE_BUTTON, continue_rect)
-
-	if continue_rect.collidepoint(mouse_x, mouse_y):
-		draw_dark_image(CONTINUE_BUTTON, continue_rect, (60, 60, 60))
-		if mouse_clicked:
-			draw_dark_image(CONTINUE_BUTTON, continue_rect, (120, 120, 120))
-			show_paused = False
-			click_sound.play()
-			return 2
-
+ 
 	# Replay
 	replay_rect = pg.Rect(0, 0, *REPLAY_BUTTON.get_size())
 	replay_rect.center = (panel_rect.centerx - 80, panel_rect.centery)
 	screen.blit(REPLAY_BUTTON, replay_rect)
+ 
+	# Home
+	home_rect = pg.Rect(0, 0, *HOME_BUTTON.get_size())
+	home_rect.center = (panel_rect.centerx + 80, panel_rect.centery)
+	screen.blit(HOME_BUTTON, home_rect)
+ 
+	show_paused = True
+
+	if continue_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(CONTINUE_BUTTON, continue_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			draw_dark_image(CONTINUE_BUTTON, continue_rect, (120, 120, 120))
+			show_paused = False
+			click_sound.play()
 
 	if replay_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(REPLAY_BUTTON, replay_rect, (60, 60, 60))
 		if mouse_clicked:
 			draw_dark_image(REPLAY_BUTTON, replay_rect, (120, 120, 120))
 			click_sound.play()
-			return 0
-
-	# Home
-	home_rect = pg.Rect(0, 0, *HOME_BUTTON.get_size())
-	home_rect.center = (panel_rect.centerx + 80, panel_rect.centery)
-	screen.blit(HOME_BUTTON, home_rect)
+			return "time_up"
 
 	if home_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
 		if mouse_clicked:
 			draw_dark_image(HOME_BUTTON, home_rect, (120, 120, 120))
 			click_sound.play()
-			return 1
+			return "start_screen"
 
-	return 3
+	return mouse_clicked, show_paused
 
 # Sign-in system functions:
 def load_players():
@@ -623,7 +895,7 @@ def add_player(name, password):
 
 # Displays the starting screen:
 def start_screen():
-	global sound_on, music_on, current_player, USER_BACKGROUND, board_row, board_column, num_same_tile, num_tile_on_board, margin_x, margin_y, board, lives, level, remaining_time, curr_remaining_time
+	global sound_on, music_on, current_player, user_background, board_row, board_column, num_same_tile, num_tile_on_board, margin_x, margin_y, board, lives, level, remaining_time, curr_remaining_time
 	global show_warning_guest, show_warning_saveless, show_instruction, show_sign_in, show_select_size, show_register
 
 	# Currently open panels:
@@ -636,11 +908,11 @@ def start_screen():
 
 	# Signals:
 	mouse_clicked = False
-	start_game = False
+
 	mouse_x, mouse_y = 0, 0
 
 	# Sign-in variables:
-	sign_in_error = ""
+	error = ""
 	name_input = ""
 	password_input = ""
 	input_active = "name"  # or "password"
@@ -658,15 +930,15 @@ def start_screen():
 
 		# Player status text
 		display_name = current_player
-		USER_BACKGROUND = pg.transform.scale(USER_BACKGROUND, (len(display_name)*20 + 180, 72))
-		user_background_rect = USER_BACKGROUND.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT - image_height) // 2 + 60))
-		screen.blit(USER_BACKGROUND, user_background_rect)
+		user_background = pg.transform.scale(user_background, (len(display_name)*20 + 180, 72))
+		user_background_rect = user_background.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT - image_height) // 2 + 60))
+		screen.blit(user_background, user_background_rect)
 		player_text = FONT_ARIAL.render(f"Playing as {display_name}", True, (0, 0, 0))
 		text_rect = player_text.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT - image_height) // 2 + 60))
 		screen.blit(player_text, text_rect)
 
 		mouse_clicked = False
-		panel_open = (show_instruction, show_warning_guest, show_warning_saveless, show_select_size, show_sign_in) # Checks if any panel is currently open
+		panel_open = (show_instruction, show_warning_guest, show_warning_saveless, show_select_size, show_sign_in, show_register) # Checks if any panel is currently open
 
 		# Event handling:
 		for event in pg.event.get():
@@ -683,20 +955,22 @@ def start_screen():
 
 			# Taking input from user if signing in:     
 			if event.type == pg.KEYDOWN and show_sign_in:
-				if event.key == pg.K_RETURN:
+				if event.key == pg.K_TAB:
+					input_active = "password" if input_active == "name" else "name"
+				elif event.key == pg.K_RETURN:
 					if (name_input == "[Guest]" and password_input == "") or verify_player(name_input, password_input):
 						current_player = name_input
 						show_sign_in = False
 						name_input = ""
 						password_input = ""
-						sign_in_error = ""
+						error = ""
 					else:
 						if name_input == "[Guest]":
-							sign_in_error = "Leave password blank to play as [Guest]"
+							error = "Leave password blank to play as [Guest]"
 						elif name_input not in players:
-							sign_in_error = "Username not found"
+							error = "Username not found"
 						else:
-							sign_in_error = "Incorrect password"
+							error = "Incorrect password"
 						fail_sound.play()
 				elif event.key == pg.K_BACKSPACE:
 					if input_active == "name":
@@ -715,18 +989,18 @@ def start_screen():
 					input_active = "password" if input_active == "name" else "name"
 				elif event.key == pg.K_RETURN:
 					if name_input in players:
-						sign_in_error = "Username already exists"
+						error = "Username already exists"
 						fail_sound.play()
 					else:	
 						if name_input == "[Guest]":
-							sign_in_error = "Cannot register as [Guest]"
+							error = "Cannot register as [Guest]"
 							fail_sound.play()
 						else:
 							add_player(name_input, password_input)
 							show_register = False
 							name_input = ""
 							password_input = ""
-							sign_in_error = ""
+							error = ""
 							players = load_players()
 				elif event.key == pg.K_BACKSPACE:
 					if input_active == "name":
@@ -750,260 +1024,39 @@ def start_screen():
 				return
 
 			mouse_clicked = draw_sign_in_button(mouse_x, mouse_y, mouse_clicked)
-   
 			mouse_clicked = draw_register_button(mouse_x, mouse_y, mouse_clicked)
-
 			mouse_clicked = draw_sound_button(mouse_x, mouse_y, mouse_clicked)
-   
 			mouse_clicked = draw_music_button(mouse_x, mouse_y, mouse_clicked)
-
 			mouse_clicked = draw_info_button(mouse_x, mouse_y, mouse_clicked)
    
-
-		
 		# Handles currently open panel: 
 		# Instruction panel:
 		if show_instruction:
-			show_dim_screen()
-			instruct_rect = INSTRUCTION_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-			screen.blit(INSTRUCTION_PANEL, instruct_rect)
-
-			exit_rect = EXIT_BUTTON.get_rect(topright=(instruct_rect.right - 10, instruct_rect.top + 30))
-			screen.blit(EXIT_BUTTON, exit_rect)
-
-			if exit_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_instruction = False
-					click_sound.play()
+			mouse_clicked, show_instruction = draw_panel_instruction(mouse_x, mouse_y, mouse_clicked)
 
 		# Saveless warning panel (continuing without saved game):
 		if show_warning_saveless:
-			show_dim_screen()
-			warning_saveless_rect = WARNING_SAVELESS_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-			screen.blit(WARNING_SAVELESS_PANEL, warning_saveless_rect)
-			proceed_rect = PROCEED_BUTTON.get_rect(center=(warning_saveless_rect.centerx, warning_saveless_rect.bottom - 50))
-			screen.blit(PROCEED_BUTTON, proceed_rect)
-
-			exit_rect = EXIT_BUTTON.get_rect(topright=(warning_saveless_rect.right - 10, warning_saveless_rect.top + 30))
-			screen.blit(EXIT_BUTTON, exit_rect)
-			
-			if proceed_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(PROCEED_BUTTON, proceed_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_select_size = True
-					show_warning_saveless = False
-					click_sound.play()
-			elif exit_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_warning_saveless = False
-					click_sound.play()
+			mouse_clicked, show_warning_saveless, show_select_size = draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked)
 
 		# Warning guest panel:
 		if show_warning_guest:
-			show_dim_screen()
-			warning_rect = WARNING_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-			screen.blit(WARNING_PANEL, warning_rect)
-			proceed_rect = PROCEED_BUTTON.get_rect(center=(warning_rect.centerx, warning_rect.bottom - 50))
-			screen.blit(PROCEED_BUTTON, proceed_rect)
-
-			exit_rect = EXIT_BUTTON.get_rect(topright=(warning_rect.right - 10, warning_rect.top + 30))
-			screen.blit(EXIT_BUTTON, exit_rect)
-			
-			if proceed_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(PROCEED_BUTTON, proceed_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_select_size = True
-					show_warning_guest = False
-					click_sound.play()
-			elif exit_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_warning_guest = False
-					click_sound.play()
-		
-		# Select board size panel, this leads to the start of the game:
-		if show_select_size:
-			
-			# Board configuration:
-			# Small: 5 x 10
-			# Medium: 7 x 12
-			# Large: 9 x 14
-			# True row and column are board_row - 2 and board_column - 2
-
-			show_dim_screen()
-			select_size_rect = SELECT_SIZE_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-			screen.blit(SELECT_SIZE_PANEL, select_size_rect)
-
-			small_rect = SIZE_SMALL_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.top + 150))
-			screen.blit(SIZE_SMALL_BUTTON, small_rect)
-			medium_rect = SIZE_MEDIUM_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.centery))
-			screen.blit(SIZE_MEDIUM_BUTTON, medium_rect)
-			large_rect = SIZE_LARGE_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.bottom - 150))
-			screen.blit(SIZE_LARGE_BUTTON, large_rect)
-
-			exit_rect = EXIT_BUTTON.get_rect(topright=(select_size_rect.right - 10, select_size_rect.top + 30))
-			screen.blit(EXIT_BUTTON, exit_rect)
-
-			if small_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(SIZE_SMALL_BUTTON, small_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					board_row = 7
-					board_column = 12
-					num_tile_on_board = 25
-					num_same_tile = 2
-					start_game = True
-					click_sound.play()
-
-			elif medium_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(SIZE_MEDIUM_BUTTON, medium_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					board_row = 9
-					board_column = 14
-					num_tile_on_board = 21
-					num_same_tile = 4
-					start_game = True
-					click_sound.play()
-
-			elif large_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(SIZE_LARGE_BUTTON, large_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					board_row = 11
-					board_column = 16
-					num_tile_on_board = 21
-					num_same_tile = 6
-					start_game = True
-					click_sound.play()
-			
-			elif exit_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_select_size = False
-					click_sound.play()
-
-			if start_game:
-				margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
-				margin_y = (SCREEN_HEIGHT - TILE_HEIGHT * board_row) // 2 + 15
-				board = get_random_board()
-				return
+			mouse_clicked, show_warning_guest, show_select_size = draw_panel_warning_guest(mouse_x, mouse_y, mouse_clicked)
 		
 		# Sign in panel:
 		if show_sign_in:
-			show_dim_screen()
-			panel_rect = SIGN_IN_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-			screen.blit(SIGN_IN_PANEL, panel_rect)
-
-			# Add exit button
-			exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
-			screen.blit(EXIT_BUTTON, exit_rect)
-
-			if exit_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_sign_in = False
-					sign_in_error = ""  
-					name_input = ""  
-					password_input = ""
-					click_sound.play()
-
-			if NAME_HITBOX_SIGN_IN.collidepoint(mouse_x, mouse_y) and mouse_clicked:
-				mouse_clicked = False
-				input_active = "name"
-
-			if PASSWORD_HITBOX_SIGN_IN.collidepoint(mouse_x, mouse_y) and mouse_clicked:
-				mouse_clicked = False
-				input_active = "password"
-				
-
-			# Draw input fields and text
-			name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
-			password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
-
-			name_rect = name_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery - 55))
-			# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_SIGN_IN, 1)
-			password_rect = password_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery + 43))
-			# pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_SIGN_IN, 1)
-			
-			screen.blit(name_text, name_rect)
-			screen.blit(password_text, password_rect)
-
-			# Draw active input indicator
-			if input_active == "name":
-				pg.draw.line(screen, (0, 0, 0),  
-							(name_rect.right + 5, name_rect.top + 2), 
-							(name_rect.right + 5, name_rect.bottom - 2), 2)
-			else:
-				pg.draw.line(screen, (0, 0, 0), 
-							(password_rect.right + 5, password_rect.top + 2), 
-							(password_rect.right + 5, password_rect.bottom - 2), 2)
-
-			# Draw error message if any
-			if sign_in_error:
-				error_text = FONT_ARIAL.render(sign_in_error, True, (255, 0, 0))  # Keep error in red
-				error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 150))
-				screen.blit(error_text, error_rect)
+			mouse_clicked, input_active, name_input, password_input, show_sign_in = draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input, password_input, error)
 
 		# Register panel:
 		if show_register:
-			show_dim_screen()
-			panel_rect = REGISTER_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
-			screen.blit(REGISTER_PANEL, panel_rect)
+			mouse_clicked, input_active, name_input, password_input, show_register = draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_input, password_input, error)
 
-			# Add exit button
-			exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
-			screen.blit(EXIT_BUTTON, exit_rect)
-
-			if exit_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					show_register = False
-					sign_in_error = ""  # Clear entered inputs
-					name_input = ""  
-					password_input = ""
-					click_sound.play()
-     
-			if NAME_HITBOX_SIGN_IN.collidepoint(mouse_x, mouse_y):
-				pass
-
-			# Draw input fields and text
-			name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
-			password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
-
-			name_rect = name_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery - 65))
-			# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_REGISTER, 1)
-			password_rect = password_text.get_rect(center=(panel_rect.centerx + 75, panel_rect.centery + 43))
-			# pg.draw.rect(screen, (0, 0, 0), PASSWORD_HITBOX_REGISTER, 1)
-
-			screen.blit(name_text, name_rect)
-			screen.blit(password_text, password_rect)
-
-			# Draw active input indicator
-			if input_active == "name":
-				pg.draw.line(screen, (0, 0, 0),  
-							(name_rect.right + 5, name_rect.top + 2), 
-							(name_rect.right + 5, name_rect.bottom - 2), 2)
+		# Select board size panel, this leads to the start of the game:
+		if show_select_size:
+			select = draw_panel_select_size(mouse_x, mouse_y, mouse_clicked)
+			if select == "start_game":
+				return 
 			else:
-				pg.draw.line(screen, (0, 0, 0), 
-							(password_rect.right + 5, password_rect.top + 2), 
-							(password_rect.right + 5, password_rect.bottom - 2), 2)
-
-			# Draw error message if any
-			if sign_in_error:
-				error_text = FONT_ARIAL.render(sign_in_error, True, (255, 0, 0))  # Keep error in red
-				error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 105))
-				screen.blit(error_text, error_rect)
+				mouse_clicked, show_select_size = select
 
 		pg.display.flip()
 
@@ -1106,49 +1159,13 @@ def playing():
 			return "time_up"
   
 		if show_paused:
-			show_dim_screen()
-
-			panel_rect = pg.Rect(0, 0, *PAUSE_PANEL_IMAGE.get_size())
-			panel_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-			screen.blit(PAUSE_PANEL_IMAGE, panel_rect)
-
-			# Continue
-			continue_rect = pg.Rect(0, 0, *CONTINUE_BUTTON.get_size())
-			continue_rect.center = (panel_rect.centerx, panel_rect.centery)
-			screen.blit(CONTINUE_BUTTON, continue_rect)
-
-			if continue_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(CONTINUE_BUTTON, continue_rect, (60, 60, 60))
-				if mouse_clicked:
-					mouse_clicked = False
-					draw_dark_image(CONTINUE_BUTTON, continue_rect, (120, 120, 120))
-					show_paused = False
-					click_sound.play()
-
-			# Replay
-			replay_rect = pg.Rect(0, 0, *REPLAY_BUTTON.get_size())
-			replay_rect.center = (panel_rect.centerx - 80, panel_rect.centery)
-			screen.blit(REPLAY_BUTTON, replay_rect)
-
-			if replay_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(REPLAY_BUTTON, replay_rect, (60, 60, 60))
-				if mouse_clicked:
-					draw_dark_image(REPLAY_BUTTON, replay_rect, (120, 120, 120))
-					click_sound.play()
-					return "time_up"
-
-			# Home
-			home_rect = pg.Rect(0, 0, *HOME_BUTTON.get_size())
-			home_rect.center = (panel_rect.centerx + 80, panel_rect.centery)
-			screen.blit(HOME_BUTTON, home_rect)
-
-			if home_rect.collidepoint(mouse_x, mouse_y):
-				draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
-				if mouse_clicked:
-					draw_dark_image(HOME_BUTTON, home_rect, (120, 120, 120))
-					click_sound.play()
-					return "start_screen"
-				
+			select = draw_panel_paused(mouse_x, mouse_y, mouse_clicked)
+			if select == "time_up":
+				return "time_up"
+			elif select == "start_screen":	
+				return "start_screen"
+			else:
+				mouse_clicked, show_paused = select
 
 
 		
