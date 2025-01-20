@@ -90,7 +90,7 @@ LIVES_IMAGE = pg.transform.scale(pg.image.load("assets/images/heart.png"), (50, 
 
 # Background music:
 pg.mixer.music.load("assets/music/background1.mp3")
-pg.mixer.music.set_volume(0.1)
+pg.mixer.music.set_volume(0.4)
 pg.mixer.music.play(-1, 0.0, 5000)
 music_on = True
 
@@ -107,6 +107,11 @@ win_sound.set_volume(0.2)
 game_over_sound = pg.mixer.Sound("assets/sound/gameover.wav")
 game_over_sound.set_volume(0.2)
 sound_on = True
+
+# Load the warning sound
+warning_sound = pg.mixer.Sound("assets/sound/warning.mp3")
+warning_sound.set_volume(0.2)
+warning_sound_played = False	# Variable to track if the warning sound has been played
 
 # Working with sign-in and register systems:
 current_player = "[Guest]"
@@ -222,9 +227,17 @@ def draw_lives(lives, level):
 
 	screen.blit(LIST_LEVEL[level - 1], (SCREEN_WIDTH - 70, 12))
  
+# Function to interpolate between two colors
+def interpolate_color(color1, color2, factor):
+    return (
+        int(color1[0] + (color2[0] - color1[0]) * factor),
+        int(color1[1] + (color2[1] - color1[1]) * factor),
+        int(color1[2] + (color2[2] - color1[2]) * factor)
+    ) 
+
  # Draws a time bar:
 def draw_time_bar(start_time):
-	global time_start_paused, time_paused, curr_remaining_time, bonus_time
+	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
 	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2, border_radius = 20)
 	current_time = time.time()
 	 # ratio between remaining time and total time
@@ -252,6 +265,12 @@ def draw_time_bar(start_time):
 	# Calculate inner bar width
 	inner_width = max(3, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
     
+    # Interpolate color from green to red based on remaining time
+	green = (0, 255, 0)
+	red = (255, 0, 0)
+	color_factor = 1 - timeOut
+	bar_color = interpolate_color(green, red, color_factor)
+    
     # If time is actually up, set width to 0
 	if timeOut <= 0:
 		inner_width = 0
@@ -261,9 +280,19 @@ def draw_time_bar(start_time):
     
     # Only draw with border radius if bar is wide enough
 	if inner_width >= 3:
-		pg.draw.rect(screen, 'green', (innerPos, innerSize), border_radius=20)
+		pg.draw.rect(screen, bar_color, (innerPos, innerSize), border_radius=20)
 	elif inner_width > 0:  # For very small widths, draw without border radius
-		pg.draw.rect(screen, 'green', (innerPos, innerSize))
+		pg.draw.rect(screen, bar_color, (innerPos, innerSize))
+  
+	# Check if remaining time in the time bar is 10 seconds or less and play warning sound
+	if real_remaining_time <= 10:
+		if not warning_sound_played:
+			warning_sound.play()
+			warning_sound_played = True
+	else:
+		if warning_sound_played:
+			warning_sound.stop()
+			warning_sound_played = False
 
 # Draws pause button:
 def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
@@ -768,11 +797,11 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 	select_size_rect = SELECT_SIZE_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 	screen.blit(SELECT_SIZE_PANEL, select_size_rect)
 
-	small_rect = SIZE_SMALL_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.top + 150))
+	small_rect = SIZE_SMALL_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.top + 160))
 	screen.blit(SIZE_SMALL_BUTTON, small_rect)
-	medium_rect = SIZE_MEDIUM_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.centery))
+	medium_rect = SIZE_MEDIUM_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.centery + 20))
 	screen.blit(SIZE_MEDIUM_BUTTON, medium_rect)
-	large_rect = SIZE_LARGE_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.bottom - 150))
+	large_rect = SIZE_LARGE_BUTTON.get_rect(center=(select_size_rect.centerx, select_size_rect.bottom - 120))
 	screen.blit(SIZE_LARGE_BUTTON, large_rect)
 
 	exit_rect = EXIT_BUTTON.get_rect(topright=(select_size_rect.right - 10, select_size_rect.top + 30))
