@@ -41,7 +41,7 @@ TIME_ICON = pg.transform.scale(pg.image.load("assets/images/tiles/section1.png")
 
 # Game level and time:
 MAX_LEVEL = 5
-GAME_TIME = 5
+GAME_TIME = 180
 TIME_END = 6 # Game over screen time
 
 # Font loading:
@@ -269,11 +269,14 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
         if mouse_clicked:
             mouse_clicked = False
             current_hint = get_hint(board)
+            reshuffle_text = FONT_ARIAL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
+            text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+            pg.draw.rect(screen, (0, 0, 0), text_rect, 1)
             if not current_hint:
                 reset_board(board)
 				# Add reshuffle message
                 reshuffle_text = FONT_ARIAL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
-                text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 80))
+                text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
                 screen.blit(reshuffle_text, text_rect)
                 pg.display.flip()
                 pg.time.wait(3000)  # Show message for 1 second
