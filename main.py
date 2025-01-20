@@ -228,8 +228,12 @@ def draw_time_bar(start_time, bonus_time):
 		time_start_paused = 0
 
 		curr_remaining_time = GAME_TIME - (current_time - start_time - time_paused) + bonus_time
-
-	timeOut = (curr_remaining_time - (GAME_TIME - remaining_time)) / GAME_TIME
+	real_remaining_time = curr_remaining_time - (GAME_TIME - remaining_time)
+	timeOut = real_remaining_time / GAME_TIME
+	time_text = FONT_ARIAL.render(f"{str(int(real_remaining_time // 60)).zfill(2)}:{str(int(real_remaining_time % 60)).zfill(2)}", True, (255, 255, 255))
+	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
+	screen.blit(time_text, time_rect)
+	print((curr_remaining_time - (GAME_TIME - remaining_time)))
 
 	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
 	innerSize = (TIME_BAR_WIDTH * timeOut - 4, TIME_BAR_HEIGHT - 4)
@@ -269,9 +273,6 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
         if mouse_clicked:
             mouse_clicked = False
             current_hint = get_hint(board)
-            reshuffle_text = FONT_ARIAL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
-            text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
-            pg.draw.rect(screen, (0, 0, 0), text_rect, 1)
             if not current_hint:
                 reset_board(board)
 				# Add reshuffle message
