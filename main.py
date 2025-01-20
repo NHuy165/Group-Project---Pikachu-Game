@@ -41,7 +41,7 @@ TIME_ICON = pg.transform.scale(pg.image.load("assets/images/tiles/section1.png")
 
 # Game level and time:
 MAX_LEVEL = 5
-GAME_TIME = 180
+GAME_TIME = 120
 TIME_END = 6 # Game over screen time
 
 # Font loading:
@@ -213,8 +213,16 @@ def draw_hint(hint):
 	for i, j in hint:
 		x, y = get_left_top_coords(i, j)
 		pg.draw.rect(screen, (0, 255, 0),(x - +1, y - 2, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
+ 
+# Draws current number of lives and level:
+def draw_lives(lives, level):
+	screen.blit(LIVES_IMAGE, (10, 12))
+	lives_count = FONT_PIKACHU.render(str(lives), True, 'white')
+	screen.blit(lives_count, (60, 13))
 
-# Draws a time bar:
+	screen.blit(LIST_LEVEL[level - 1], (SCREEN_WIDTH - 70, 12))
+ 
+ # Draws a time bar:
 def draw_time_bar(start_time):
 	global time_start_paused, time_paused, curr_remaining_time, bonus_time
 	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2, border_radius = 20)
@@ -241,17 +249,21 @@ def draw_time_bar(start_time):
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
 	screen.blit(time_text, time_rect)
 
+	# Calculate inner bar width
+	inner_width = max(3, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
+    
+    # If time is actually up, set width to 0
+	if timeOut <= 0:
+		inner_width = 0
+    
 	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
-	innerSize = (TIME_BAR_WIDTH * timeOut - 4, TIME_BAR_HEIGHT - 4)
-	pg.draw.rect(screen, 'green', (innerPos, innerSize), border_radius = 20)
- 
-# Draws current number of lives and level:
-def draw_lives(lives, level):
-	screen.blit(LIVES_IMAGE, (10, 12))
-	lives_count = FONT_PIKACHU.render(str(lives), True, 'white')
-	screen.blit(lives_count, (60, 13))
-
-	screen.blit(LIST_LEVEL[level - 1], (SCREEN_WIDTH - 70, 12))
+	innerSize = (inner_width, TIME_BAR_HEIGHT - 4)
+    
+    # Only draw with border radius if bar is wide enough
+	if inner_width >= 3:
+		pg.draw.rect(screen, 'green', (innerPos, innerSize), border_radius=20)
+	elif inner_width > 0:  # For very small widths, draw without border radius
+		pg.draw.rect(screen, 'green', (innerPos, innerSize))
 
 # Draws pause button:
 def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
@@ -744,7 +756,7 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 	return mouse_clicked, input_active, name_input, password_input, show_register
 
 def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
-	global board_row, board_column, num_tile_on_board, num_same_tile, margin_x, margin_y, board
+	global board_row, board_column, num_tile_on_board, num_same_tile, margin_x, margin_y, board, GAME_TIME, remaining_time, curr_remaining_time
 
 	# Board configuration:
 	# Small: 5 x 10
@@ -778,6 +790,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 			num_tile_on_board = 25
 			num_same_tile = 2
 			start_game = True
+			GAME_TIME = 60
 			click_sound.play()
 
 	elif medium_rect.collidepoint(mouse_x, mouse_y):
@@ -788,6 +801,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 			num_tile_on_board = 21
 			num_same_tile = 4
 			start_game = True
+			GAME_TIME = 120
 			click_sound.play()
 
 	elif large_rect.collidepoint(mouse_x, mouse_y):
@@ -798,6 +812,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 			num_tile_on_board = 21
 			num_same_tile = 6
 			start_game = True
+			GAME_TIME = 180
 			click_sound.play()
 
 	elif exit_rect.collidepoint(mouse_x, mouse_y):
@@ -810,6 +825,8 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 	if start_game:
 		margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
 		margin_y = (SCREEN_HEIGHT - TILE_HEIGHT * board_row) // 2 + 15
+		remaining_time = GAME_TIME
+		curr_remaining_time = GAME_TIME
 		board = get_random_board()
 		return "start_game"
 	
