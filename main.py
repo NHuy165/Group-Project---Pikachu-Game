@@ -441,14 +441,17 @@ def get_hint(board):
 		for j in range(board_column):
 			if board[i][j]:
 				tiles_location[board[i][j]].append((i, j))
-	for i in range(board_row):
-		for j in range(board_column):
-			if board[i][j]:
-				for o in tiles_location[board[i][j]]:	
-					if o != (i, j) and bfs(board, i, j, o[0], o[1]):
-						hint.append((i, j))
-						hint.append(o)
-						return hint
+	for value, positions in tiles_location.items():	
+		n = len(positions)
+		for idx1 in range(n):
+			for idx2 in range(idx1 + 1, n):
+				pos1, pos2 = positions[idx1], positions[idx2]
+				
+				# Check connectivity using BFS
+				if bfs(board, pos1[0], pos1[1], pos2[0], pos2[1]):
+					hint.append(pos1)
+					hint.append(pos2)
+					return hint
 	return []
 
 # Checks if current level is complete:
