@@ -49,6 +49,7 @@ FONT_COMICSANSMS = pg.font.SysFont('dejavusans', 40)
 FONT_TUROK = pg.font.SysFont('timesnewroman', 60)
 FONT_PIKACHU = pg.font.Font("assets/font/pikachu.otf", 50)
 FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 25)
+FONT_PIXEL = pg.font.Font('assets/font/PixeloidSans.ttf', 25)
 
 # Backgrounds:
 START_SCREEN_BACKGOUND = pg.transform.scale(pg.image.load("assets/images/background/b1g.jpg"), (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -238,7 +239,7 @@ def interpolate_color(color1, color2, factor):
  # Draws a time bar:
 def draw_time_bar(start_time):
 	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
-	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2, border_radius = 20)
+	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2)
 	current_time = time.time()
 	 # ratio between remaining time and total time
 	if show_paused:
@@ -258,12 +259,12 @@ def draw_time_bar(start_time):
   
 	real_remaining_time = curr_remaining_time - (GAME_TIME - remaining_time)
 	timeOut = real_remaining_time / GAME_TIME
-	time_text = FONT_ARIAL.render(f"{str(int(real_remaining_time // 60)).zfill(2)}:{str(int(real_remaining_time % 60)).zfill(2)}", True, (255, 255, 255))
+	time_text = FONT_PIXEL.render(f"{str(int(real_remaining_time // 60)).zfill(2)}:{str(int(real_remaining_time % 60)).zfill(2)}", True, (255, 255, 255))
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
 	screen.blit(time_text, time_rect)
 
 	# Calculate inner bar width
-	inner_width = max(3, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
+	inner_width = max(0, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
     
     # Interpolate color from green to red based on remaining time
 	green = (0, 255, 0)
@@ -278,11 +279,7 @@ def draw_time_bar(start_time):
 	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
 	innerSize = (inner_width, TIME_BAR_HEIGHT - 4)
     
-    # Only draw with border radius if bar is wide enough
-	if inner_width >= 3:
-		pg.draw.rect(screen, bar_color, (innerPos, innerSize), border_radius=20)
-	elif inner_width > 0:  # For very small widths, draw without border radius
-		pg.draw.rect(screen, bar_color, (innerPos, innerSize))
+	pg.draw.rect(screen, bar_color, (innerPos, innerSize))
   
 	# Check if remaining time in the time bar is 10 seconds or less and play warning sound
 	if real_remaining_time <= 10:
@@ -323,7 +320,7 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
             if not current_hint:
                 reset_board(board)
 				# Add reshuffle message
-                reshuffle_text = FONT_ARIAL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
+                reshuffle_text = FONT_PIXEL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
                 text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
                 screen.blit(reshuffle_text, text_rect)
                 pg.display.flip()
@@ -697,8 +694,8 @@ def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input
 		
 
 	# Draw input fields and text
-	name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
-	password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
+	name_text = FONT_PIXEL.render(name_input, True, (0, 0, 0))  # Changed to black
+	password_text = FONT_PIXEL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
 
 	name_rect = name_text.get_rect(center=(panel_rect.centerx + 102, panel_rect.centery - 54))
 	# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_SIGN_IN, 1)
@@ -720,7 +717,7 @@ def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input
 
 	# Draw error message if any
 	if error:
-		error_text = FONT_ARIAL.render(error, True, (255, 0, 0)) 
+		error_text = FONT_PIXEL.render(error, True, (255, 0, 0)) 
 		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 150))
 		screen.blit(error_text, error_rect)
 
@@ -755,8 +752,8 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 		input_active = "password"
 
 	# Draw input fields and text
-	name_text = FONT_ARIAL.render(name_input, True, (0, 0, 0))  # Changed to black
-	password_text = FONT_ARIAL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
+	name_text = FONT_PIXEL.render(name_input, True, (0, 0, 0))  # Changed to black
+	password_text = FONT_PIXEL.render("*" * len(password_input), True, (0, 0, 0))  # Changed to black
 
 	name_rect = name_text.get_rect(center=(panel_rect.centerx + 102, panel_rect.centery - 64))
 	# pg.draw.rect(screen, (0, 0, 0), NAME_HITBOX_REGISTER, 1)
@@ -778,7 +775,7 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 
 	# Draw error message if any
 	if error:
-		error_text = FONT_ARIAL.render(error, True, (255, 0, 0)) 
+		error_text = FONT_PIXEL.render(error, True, (255, 0, 0)) 
 		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 105))
 		screen.blit(error_text, error_rect)
 
@@ -992,7 +989,7 @@ def start_screen():
 		user_background = pg.transform.scale(user_background, (len(display_name)*20 + 180, 72))
 		user_background_rect = user_background.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT - image_height) // 2 + 60))
 		screen.blit(user_background, user_background_rect)
-		player_text = FONT_ARIAL.render(f"Playing as {display_name}", True, (0, 0, 0))
+		player_text = FONT_PIXEL.render(f"Playing as {display_name}", True, (0, 0, 0))
 		text_rect = player_text.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT - image_height) // 2 + 60))
 		screen.blit(player_text, text_rect)
 
