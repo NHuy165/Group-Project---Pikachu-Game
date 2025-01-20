@@ -132,12 +132,14 @@ curr_remaining_time = GAME_TIME
 
 # Resets game info:
 def reset_game_info():
-	global board, lives, level, remaining_time, curr_remaining_time
+	global board, lives, level, remaining_time, curr_remaining_time, bonus_time, show_hint
 	board = None
 	lives = 3
 	level = 1
 	remaining_time = GAME_TIME
 	curr_remaining_time = GAME_TIME
+	bonus_time = 0
+	show_hint = False
 
 # Gets top-left corner coordinates of a tile based on its row (i) and column (j):
 def get_left_top_coords(i, j): 
@@ -213,8 +215,8 @@ def draw_hint(hint):
 		pg.draw.rect(screen, (0, 255, 0),(x - +1, y - 2, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
 
 # Draws a time bar:
-def draw_time_bar(start_time, bonus_time):
-	global time_start_paused, time_paused, curr_remaining_time
+def draw_time_bar(start_time):
+	global time_start_paused, time_paused, curr_remaining_time, bonus_time
 	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2, border_radius = 20)
 	current_time = time.time()
 	 # ratio between remaining time and total time
@@ -228,12 +230,16 @@ def draw_time_bar(start_time, bonus_time):
 		time_start_paused = 0
 
 		curr_remaining_time = GAME_TIME - (current_time - start_time - time_paused) + bonus_time
+		if curr_remaining_time > GAME_TIME:
+			bonus_time -= curr_remaining_time - GAME_TIME
+			curr_remaining_time = GAME_TIME
+      
+  
 	real_remaining_time = curr_remaining_time - (GAME_TIME - remaining_time)
 	timeOut = real_remaining_time / GAME_TIME
 	time_text = FONT_ARIAL.render(f"{str(int(real_remaining_time // 60)).zfill(2)}:{str(int(real_remaining_time % 60)).zfill(2)}", True, (255, 255, 255))
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
 	screen.blit(time_text, time_rect)
-	print((curr_remaining_time - (GAME_TIME - remaining_time)))
 
 	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
 	innerSize = (TIME_BAR_WIDTH * timeOut - 4, TIME_BAR_HEIGHT - 4)
@@ -1071,7 +1077,7 @@ def start_screen():
 
 # Handles the main game loop where gameplay occurs:
 def playing():
-	global level, lives, show_paused, time_start_paused, time_paused, show_hint, current_hint, board, lives, level, remaining_time
+	global level, lives, show_paused, time_start_paused, time_paused, bonus_time, show_hint, current_hint, board, lives, level, remaining_time
 
 	# Time variables:
 	show_paused = False
@@ -1098,7 +1104,7 @@ def playing():
 		screen.blit(dim_screen, (0, 0))
 		draw_board(board)
 		draw_lives(lives, level)
-		draw_time_bar(start_time, bonus_time)
+		draw_time_bar(start_time)
 		draw_clicked_tiles(board, clicked_tiles)
 
 		mouse_clicked = False
@@ -1132,6 +1138,7 @@ def playing():
 
 			if event.type == pg.KEYUP:
 				if event.key == pg.K_k: # use key k to hack game
+					show_hint = False
 					tile1_i, tile1_j = hint[0][0], hint[0][1]
 					tile2_i, tile2_j = hint[1][0], hint[1][1]
 					board[tile1_i][tile1_j] = 0
@@ -1237,7 +1244,7 @@ def playing():
 # Incorporates all the above functions to run the game: 
 def main():
 	#init pygame and module
-	global level, lives, board, curr_remaining_time, remaining_time
+	global level, lives, board, curr_remaining_time, remaining_time, show_hint
 	
 	while True:
 		start_screen()
@@ -1257,6 +1264,7 @@ def main():
 				pg.mixer.music.play()
 			elif signal == "time_up":
 				lives -= 1
+				show_hint = False
 				board = get_random_board()
 				remaining_time = GAME_TIME
 			elif signal == "game_over":
