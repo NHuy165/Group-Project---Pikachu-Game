@@ -74,9 +74,11 @@ SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size
 SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_large.png"), (373, 72)).convert_alpha()
 SELECT_SIZE_PANEL = pg.transform.scale(pg.image.load("assets/images/button/select_size_panel.png"), (700, 469)).convert_alpha()
 INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instruction.png"), (760, 469)).convert_alpha()
+SHORTCUT_PANEL = pg.transform.scale(pg.image.load("assets/images/button/shortcut_panel.png"), (1000, 500)).convert_alpha()
 SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"), (50, 50))
 MUSIC_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/music.png"), (50, 50))
 INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
+SHORTCUT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/shortcut.png"), (50, 50))
 
 # Game UI:
 EXIT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/close.png"), (60, 60))
@@ -124,6 +126,11 @@ PASSWORD_HITBOX_SIGN_IN = pg.Rect(570, 383, 345, 41)
 NAME_HITBOX_REGISTER = pg.Rect(570, 295, 345, 42)
 PASSWORD_HITBOX_REGISTER = pg.Rect(570, 395, 345, 42)
 
+# Working with space, hint, music and sound keys
+space_key_pressed = False
+hint_key_pressed = False
+music_key_pressed = False
+sound_key_pressed = False
 
 # Working with hints:
 current_hint = None  # Will store the current hint tiles
@@ -293,41 +300,53 @@ def draw_time_bar(start_time):
 
 # Draws pause button:
 def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
-	global show_paused
+	global show_paused, space_key_pressed
 	pause_rect = pg.Rect(0, 0, *PAUSE_BUTTON.get_size())
 	pause_rect.center = (SCREEN_WIDTH - 220, 35)
 	screen.blit(PAUSE_BUTTON, pause_rect)
-	if pause_rect.collidepoint(mouse_x, mouse_y):
+	keys = pg.key.get_pressed()
+ 
+	# Check if the pause button is clicked or the space key is pressed
+	if pause_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_SPACE]:
 		if not show_paused: 
 			draw_dark_image(PAUSE_BUTTON, pause_rect, (60, 60, 60))
-			if mouse_clicked:
+			# Check if the mouse is clicked or the space key is pressed for the first time
+			if mouse_clicked or (keys[pg.K_SPACE] and not space_key_pressed):
 				mouse_clicked = False
 				show_paused = True
 				click_sound.play()
+				space_key_pressed = True  # Set the flag to indicate the space key is pressed
+	else:
+		space_key_pressed = False  # Reset the flag when the space key is released
 	return mouse_clicked
 
 # Draws hint button: 
 def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
-    global current_hint, show_hint
+    global current_hint, show_hint, hint_key_pressed
     hint_rect = pg.Rect(0, 0, *HINT_BUTTON.get_size())
     hint_rect.center = (35, SCREEN_HEIGHT - 400)
     screen.blit(HINT_BUTTON, hint_rect)
-    if hint_rect.collidepoint(mouse_x, mouse_y):
+    keys = pg.key.get_pressed()	
+    
+    if hint_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_h]:
         draw_dark_image(HINT_BUTTON, hint_rect, (60, 60, 60))
-        if mouse_clicked:
+        if mouse_clicked or (keys[pg.K_h] and not hint_key_pressed):
             mouse_clicked = False
             current_hint = get_hint(board)
+            hint_key_pressed = True
             if not current_hint:
                 reset_board(board)
 				# Add reshuffle message
                 reshuffle_text = FONT_PIXEL.render("No valid moves found. Reshuffling board...", True, (255, 255, 255))
-                text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+                text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 80))
                 screen.blit(reshuffle_text, text_rect)
                 pg.display.flip()
                 pg.time.wait(3000)  # Show message for 1 second
 
             show_hint = True
             click_sound.play()
+    else:
+        hint_key_pressed = False
     return mouse_clicked
 
 # Draws New Game button:
@@ -414,7 +433,7 @@ def draw_register_button(mouse_x, mouse_y, mouse_clicked):
 
 # Draws sound button:
 def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
-	global sound_on
+	global sound_on, sound_key_pressed
 
 	sound_rect = SOUND_BUTTON.get_rect(center=(65, SCREEN_HEIGHT - 65))
 	if sound_on:
@@ -422,11 +441,13 @@ def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
 	else: 
 		draw_dark_image(SOUND_BUTTON, sound_rect, (120, 120, 120))
 	
-	if sound_rect.collidepoint(mouse_x, mouse_y):
+	keys = pg.key.get_pressed()
+	if sound_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_s]:
 		if sound_on:
 			draw_dark_image(SOUND_BUTTON, sound_rect, (60, 60, 60))
-		if mouse_clicked:
+		if mouse_clicked or (keys[pg.K_s] and not sound_key_pressed):
 			mouse_clicked = False
+			sound_key_pressed = True
 			if sound_on:
 				sound_on = False
 				success_sound.set_volume(0)
@@ -439,11 +460,13 @@ def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
 				fail_sound.set_volume(0.2)
 				click_sound.set_volume(0.2)
 			click_sound.play()
+	else:
+		sound_key_pressed = False
 	return mouse_clicked
 
 # Draws sound button:
 def draw_music_button(mouse_x, mouse_y, mouse_clicked):
-	global music_on
+	global music_on, music_key_pressed
 
 	music_rect = MUSIC_BUTTON.get_rect(center=(130, SCREEN_HEIGHT - 65))
 	if music_on:
@@ -451,11 +474,13 @@ def draw_music_button(mouse_x, mouse_y, mouse_clicked):
 	else: 
 		draw_dark_image(MUSIC_BUTTON, music_rect, (120, 120, 120))
 	
-	if music_rect.collidepoint(mouse_x, mouse_y):
+	keys = pg.key.get_pressed()
+	if music_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_m]:
 		if music_on:
 			draw_dark_image(MUSIC_BUTTON, music_rect, (60, 60, 60))
-		if mouse_clicked:
+		if mouse_clicked or (keys[pg.K_m] and not music_key_pressed):
 			mouse_clicked = False
+			music_key_pressed = True
 			if music_on:
 				music_on = False
 				pg.mixer.music.set_volume(0)
@@ -465,6 +490,8 @@ def draw_music_button(mouse_x, mouse_y, mouse_clicked):
 				pg.mixer.music.set_volume(0.1)
 	
 			click_sound.play()
+	else:
+		music_key_pressed = False
 	return mouse_clicked
 
 # Draws info button:
@@ -478,6 +505,20 @@ def draw_info_button(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_instruction = True
+			click_sound.play()
+	return mouse_clicked
+
+# Draws info button:
+def draw_shortcut_button(mouse_x, mouse_y, mouse_clicked):
+	global show_shortcut
+
+	info_rect = SHORTCUT_BUTTON.get_rect(center=(SCREEN_WIDTH - 130, SCREEN_HEIGHT - 65))
+	screen.blit(SHORTCUT_BUTTON, info_rect)
+	if info_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(SHORTCUT_BUTTON, info_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_shortcut = True
 			click_sound.play()
 	return mouse_clicked
 
@@ -604,6 +645,25 @@ def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
 			show_instruction = False
 			click_sound.play()
 	return mouse_clicked, show_instruction
+
+# Displays the instruction panel:
+def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
+	show_dim_screen()
+	instruct_rect = SHORTCUT_PANEL.get_rect(center=(SCREEN_WIDTH // 2 + 65, SCREEN_HEIGHT // 2))
+	screen.blit(SHORTCUT_PANEL, instruct_rect)
+
+	exit_rect = EXIT_BUTTON.get_rect(topright=(instruct_rect.right - 10, instruct_rect.top + 30))
+	screen.blit(EXIT_BUTTON, exit_rect)
+
+	show_shortcut = True
+
+	if exit_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			show_shortcut = False
+			click_sound.play()
+	return mouse_clicked, show_shortcut
 
 # Displays the saveless warning panel:
 def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
@@ -860,7 +920,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 
 # Displays the pause panel:
 def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
-	global lives
+	global lives, space_key_pressed
  
 	show_dim_screen()
 	panel_rect = pg.Rect(0, 0, *PAUSE_PANEL_IMAGE.get_size())
@@ -883,25 +943,28 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 	screen.blit(HOME_BUTTON, home_rect)
  
 	show_paused = True
-
-	if continue_rect.collidepoint(mouse_x, mouse_y):
+	keys = pg.key.get_pressed()
+	if continue_rect.collidepoint(mouse_x, mouse_y) or (keys[pg.K_SPACE] and not space_key_pressed):
 		draw_dark_image(CONTINUE_BUTTON, continue_rect, (60, 60, 60))
-		if mouse_clicked:
+		if mouse_clicked or (keys[pg.K_SPACE] and not space_key_pressed):
 			mouse_clicked = False
 			draw_dark_image(CONTINUE_BUTTON, continue_rect, (120, 120, 120))
 			show_paused = False
 			click_sound.play()
+			space_key_pressed = True  # Set the flag to indicate the space key is pressed
+	elif not keys[pg.K_SPACE]:
+		space_key_pressed = False  # Reset the flag when the space key is released
 
-	if replay_rect.collidepoint(mouse_x, mouse_y):
+	if replay_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_r]:
 		draw_dark_image(REPLAY_BUTTON, replay_rect, (60, 60, 60))
-		if mouse_clicked:
+		if mouse_clicked or keys[pg.K_r]:
 			draw_dark_image(REPLAY_BUTTON, replay_rect, (120, 120, 120))
 			click_sound.play()
 			return "time_up"
 
-	if home_rect.collidepoint(mouse_x, mouse_y):
+	if home_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_ESCAPE]:
 		draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
-		if mouse_clicked:
+		if mouse_clicked or keys[pg.K_ESCAPE]:
 			draw_dark_image(HOME_BUTTON, home_rect, (120, 120, 120))
 			click_sound.play()
 			return "start_screen"
@@ -952,7 +1015,7 @@ def add_player(name, password):
 # Displays the starting screen:
 def start_screen():
 	global sound_on, music_on, current_player, user_background, board_row, board_column, num_same_tile, num_tile_on_board, margin_x, margin_y, board, lives, level, remaining_time, curr_remaining_time
-	global show_warning_guest, show_warning_saveless, show_instruction, show_sign_in, show_select_size, show_register
+	global show_warning_guest, show_warning_saveless, show_instruction, show_sign_in, show_select_size, show_register, show_shortcut
 
 	# Currently open panels:
 	show_warning_guest = False
@@ -961,6 +1024,7 @@ def start_screen():
 	show_sign_in = False
 	show_register = False
 	show_select_size = False
+	show_shortcut = False
 
 	# Signals:
 	mouse_clicked = False
@@ -1084,11 +1148,16 @@ def start_screen():
 			mouse_clicked = draw_sound_button(mouse_x, mouse_y, mouse_clicked)
 			mouse_clicked = draw_music_button(mouse_x, mouse_y, mouse_clicked)
 			mouse_clicked = draw_info_button(mouse_x, mouse_y, mouse_clicked)
+			mouse_clicked = draw_shortcut_button(mouse_x, mouse_y, mouse_clicked)
    
 		# Handles currently open panel: 
 		# Instruction panel:
 		if show_instruction:
 			mouse_clicked, show_instruction = draw_panel_instruction(mouse_x, mouse_y, mouse_clicked)
+   
+		# Instruction panel:
+		if show_shortcut:
+			mouse_clicked, show_shortcut = draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked)
 
 		# Saveless warning panel (continuing without saved game):
 		if show_warning_saveless:
