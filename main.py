@@ -41,11 +41,12 @@ TIME_ICON = pg.transform.scale(pg.image.load("assets/images/tiles/section1.png")
 
 # Game level and time:
 MAX_LEVEL = 5
-GAME_TIME = 0
+TIME_VICTORY = 6
 TIME_END = 6 # Game over screen time
 
 # Font loading:
 FONT_COMICSANSMS = pg.font.SysFont('dejavusans', 40)
+FONT_COMICSANSMS.set_bold(True)
 FONT_TUROK = pg.font.SysFont('timesnewroman', 60)
 FONT_PIKACHU = pg.font.Font("assets/font/pikachu.otf", 50)
 FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 25)
@@ -65,6 +66,15 @@ SIGN_IN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sign_in.
 REGISTER_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/register.png"), (180, 72)).convert_alpha()
 OK_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/OK.png"), (180, 72)).convert_alpha()
 PROCEED_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/proceed.png").convert_alpha(), (180, 72))
+SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"), (50, 50))
+MUSIC_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/music.png"), (50, 50))
+INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
+SHORTCUT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/shortcut.png"), (50, 50))
+LEADERBOARD_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/leaderboard.png"), (50, 50))
+UP_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/up.png"), (50, 50))
+DOWN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/down.png"), (50, 50))
+LEFT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/left.png"), (50, 50))
+RIGHT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/right.png"), (50, 50))
 WARNING_GUEST_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_guest_panel.png"), (700, 469)).convert_alpha()
 WARNING_SAVELESS_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_saveless_panel.png"), (700, 469)).convert_alpha()
 SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
@@ -76,11 +86,8 @@ SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_
 SELECT_SIZE_PANEL = pg.transform.scale(pg.image.load("assets/images/button/select_size_panel.png"), (700, 469)).convert_alpha()
 INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instruction.png"), (760, 469)).convert_alpha()
 SHORTCUT_PANEL = pg.transform.scale(pg.image.load("assets/images/button/shortcut_panel.png"), (1000, 500)).convert_alpha()
-SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"), (50, 50))
-MUSIC_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/music.png"), (50, 50))
-INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
-SHORTCUT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/shortcut.png"), (50, 50))
-LEADERBOARD_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/leaderboard.png"), (90, 50))
+LEADERBOARD_PANEL = pg.transform.scale(pg.image.load("assets/images/button/leaderboard_panel.png"), (1000, 600)).convert_alpha()
+
 
 # Game UI:
 EXIT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/close.png"), (60, 60))
@@ -128,6 +135,10 @@ PASSWORD_HITBOX_SIGN_IN = pg.Rect(570, 383, 345, 41)
 NAME_HITBOX_REGISTER = pg.Rect(570, 295, 345, 42)
 PASSWORD_HITBOX_REGISTER = pg.Rect(570, 395, 345, 42)
 
+# Leaderboard variables:
+leaderboard_start = 0
+leaderboard_size = "small"
+
 # Working with space, hint, music and sound keys
 space_key_pressed = False
 hint_key_pressed = False
@@ -142,22 +153,16 @@ show_hint = False   # Flag to control hint visibility
 board = None
 lives = 3
 level = 1
-remaining_time = GAME_TIME
-curr_remaining_time = GAME_TIME
+game_time = 0
+remaining_time = 0
+curr_remaining_time = 0
 score = 0
 
-# Resets game info:
-def reset_game_info():
-	global board, lives, level, remaining_time, curr_remaining_time, bonus_time, show_hint, score
-	board = None
-	lives = 3
-	level = 1
-	remaining_time = GAME_TIME
-	curr_remaining_time = GAME_TIME
-	bonus_time = 0
-	show_hint = False
-	score = 0
+TIME_SMALL = 120
+TIME_MEDIUM = 180
+TIME_LARGE = 300
 
+# Miscellaneous functions:
 # Gets top-left corner coordinates of a tile based on its row (i) and column (j):
 def get_left_top_coords(i, j): 
 	x = j * TILE_WIDTH + margin_x
@@ -174,137 +179,19 @@ def get_index_at_mouse(x, y):
 	if x < margin_x or y < margin_y: return None, None
 	return (y - margin_y) // TILE_HEIGHT, (x - margin_x) // TILE_WIDTH
 
-# Generates a random shuffled game board:
-def get_random_board():
-	list_index_tiles = list(range(1, NUM_TILE + 1)) 
-	random.shuffle(list_index_tiles)
-	list_index_tiles = list_index_tiles[:num_tile_on_board] * num_same_tile 
-	random.shuffle(list_index_tiles)
-	board = [[0 for _ in range(board_column)] for _ in range(board_row)]
-	k = 0
-	for i in range(1, board_row - 1):
-		for j in range(1, board_column - 1):
-			board[i][j] = list_index_tiles[k]
-			k += 1
-	return board
-
-# Draws game board:
-def draw_board(board):
-	for i in range(1, board_row - 1):
-		for j in range(1, board_column - 1):
-			if board[i][j] != 0:
-				screen.blit(LIST_TILE[board[i][j]], get_left_top_coords(i, j))
-
-# Draws a darkened version of an image:
-def draw_dark_image(image, image_rect, color):
-	dark_image = image.copy()
-	dark_image.fill(color, special_flags = pg.BLEND_RGB_SUB)
-	screen.blit(dark_image, image_rect)
-
-# Darkens and draws tiles that have been clicked:
-def draw_clicked_tiles(board, clicked_tiles):
-	for i, j in clicked_tiles:
-		x, y = get_left_top_coords(i, j)
-		try:
-			darkImage = LIST_TILE[board[i][j]].copy()
-			darkImage.fill((60, 60, 60), special_flags = pg.BLEND_RGB_SUB)
-			screen.blit(darkImage, (x, y))
-		except: pass
-
-# Draws blue border around a specified tile:
-def draw_border_tile(board, i, j):
-	x, y = get_left_top_coords(i, j)
-	pg.draw.rect(screen, (0, 0, 255),(x - 1, y - 3, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
-
-# Draws a red line connecting tiles:
-def draw_path(path):
-	for i in range(len(path) - 1):
-		start_pos = (get_center_coords(path[i][0], path[i][1]))
-		end_pos = (get_center_coords(path[i + 1][0], path[i + 1][1]))
-		pg.draw.line(screen, 'red', start_pos, end_pos, 4)
-		pg.display.update()
-	pg.time.wait(400)
-
-# Draws a green border around specific tiles as hints:
-def draw_hint(hint):
-	for i, j in hint:
-		x, y = get_left_top_coords(i, j)
-		pg.draw.rect(screen, (0, 255, 0),(x - +1, y - 2, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
- 
-# Draws current number of lives and level:
-def draw_lives(lives, level, score):
-	screen.blit(LIVES_IMAGE, (10, 12))
-	lives_count = FONT_PIKACHU.render(str(lives), True, 'white')
-	screen.blit(lives_count, (60, 13))
-
-	screen.blit(LIST_LEVEL[level - 1], (SCREEN_WIDTH - 70, 12))
-	
-	score_text = FONT_ARIAL.render("Score: " + str(score), True, 'yellow')
-	screen.blit(score_text, (100, 13))
 # Function to interpolate between two colors
 def interpolate_color(color1, color2, factor):
     return (
         int(color1[0] + (color2[0] - color1[0]) * factor),
         int(color1[1] + (color2[1] - color1[1]) * factor),
         int(color1[2] + (color2[2] - color1[2]) * factor)
-    ) 
-
- # Draws a time bar:
-def draw_time_bar(start_time):
-	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
-	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2)
-	current_time = time.time()
-	 # ratio between remaining time and total time
-	if show_paused:
-		if not time_start_paused: 
-			time_start_paused = time.time()
-
-	else:
-		if time_start_paused:
-			time_paused += current_time - time_start_paused
-		time_start_paused = 0
-
-		curr_remaining_time = GAME_TIME - (current_time - start_time - time_paused) + bonus_time
-		if curr_remaining_time > GAME_TIME:
-			bonus_time -= curr_remaining_time - GAME_TIME
-			curr_remaining_time = GAME_TIME
-      
-  
-	real_remaining_time = curr_remaining_time - (GAME_TIME - remaining_time)
-	timeOut = real_remaining_time / GAME_TIME
-	time_text = FONT_PIXEL.render(f"{str(int(real_remaining_time // 60)).zfill(2)}:{str(int(real_remaining_time % 60)).zfill(2)}", True, (255, 255, 255))
-	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
-	screen.blit(time_text, time_rect)
-
-	# Calculate inner bar width
-	inner_width = max(0, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
+    )
     
-    # Interpolate color from green to red based on remaining time
-	green = (0, 255, 0)
-	red = (255, 0, 0)
-	color_factor = 1 - timeOut
-	bar_color = interpolate_color(green, red, color_factor)
-    
-    # If time is actually up, set width to 0
-	if timeOut <= 0:
-		inner_width = 0
-    
-	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
-	innerSize = (inner_width, TIME_BAR_HEIGHT - 4)
-    
-	pg.draw.rect(screen, bar_color, (innerPos, innerSize))
-  
-	# Check if remaining time in the time bar is 10 seconds or less and play warning sound
-	if real_remaining_time <= 10:
-		if not warning_sound_played:
-			warning_sound.play()
-			warning_sound_played = True
-	else:
-		if warning_sound_played:
-			warning_sound.stop()
-			warning_sound_played = False
+# Converts seconds into MM:SS format:
+def convert_time(time):
+	return f"{str(int(time // 60)).zfill(2)}:{str(int(time % 60)).zfill(2)}"
 
-# Draws pause button:
+# Draws interactive buttons:
 def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
 	global show_paused, space_key_pressed
 	pause_rect = pg.Rect(0, 0, *PAUSE_BUTTON.get_size())
@@ -326,7 +213,6 @@ def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
 		space_key_pressed = False  # Reset the flag when the space key is released
 	return mouse_clicked
 
-# Draws hint button: 
 def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
     global current_hint, show_hint, hint_key_pressed
     hint_rect = pg.Rect(0, 0, *HINT_BUTTON.get_size())
@@ -347,13 +233,18 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked, board):
                 text_rect = reshuffle_text.get_rect(center=(SCREEN_WIDTH // 2, 80))
                 screen.blit(reshuffle_text, text_rect)
                 pg.display.flip()
-                pg.time.wait(3000)  # Show message for 1 second
+                pg.time.wait(3000) 
 
             show_hint = True
             click_sound.play()
     else:
         hint_key_pressed = False
     return mouse_clicked
+
+
+
+
+
 
 def draw_leaderboard_button(mouse_x, mouse_y, mouse_clicked):
 	global show_leaderboard
@@ -368,7 +259,6 @@ def draw_leaderboard_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
-# Draws New Game button:
 def draw_new_game_button(mouse_x, mouse_y, mouse_clicked):
 	global show_select_size, show_warning_guest
 
@@ -385,10 +275,9 @@ def draw_new_game_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
-# Draws Continue button:
 def draw_continue_button(mouse_x, mouse_y, mouse_clicked, players):
 	global show_warning_saveless
-	global board, level, lives, remaining_time
+	global board, level, lives, remaining_time, game_time, score
 	global board_row, board_column, num_tile_on_board, num_same_tile
 	global margin_x, margin_y
 
@@ -410,19 +299,32 @@ def draw_continue_button(mouse_x, mouse_y, mouse_clicked, players):
 				board = players[current_player]["save"][0]
 				level = players[current_player]["save"][1]
 				lives = players[current_player]["save"][2]
-				remaining_time = players[current_player]["save"][3]
+				remaining_time = players[current_player]["save"][3][level - 1]
+				score = players[current_player]["save"][4]
 
 				board_row = len(board)
 				board_column = len(board[0])
-				num_tile_on_board = 21 if board_row != 7 else 25
+
+				if board_row == 7 and board_column == 12:
+					num_tile_on_board = 25
+					game_time = TIME_SMALL
+     
+				elif board_row == 9 and board_column == 14:
+					num_tile_on_board = 21
+					game_time = TIME_MEDIUM
+     
+				elif board_row == 11 and board_column == 16:
+					num_tile_on_board = 21
+					game_time = TIME_LARGE
+     
 				num_same_tile = ((board_row - 2) * (board_column - 2)) // num_tile_on_board
 
 				margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
 				margin_y = (SCREEN_HEIGHT - TILE_HEIGHT * board_row) // 2 + 15
+    
 				return mouse_clicked, True
 	return mouse_clicked, False
 
-# Draws Sign in button:
 def draw_sign_in_button(mouse_x, mouse_y, mouse_clicked):
 	global show_sign_in
 
@@ -436,7 +338,6 @@ def draw_sign_in_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
-# Draws Register button:
 def draw_register_button(mouse_x, mouse_y, mouse_clicked):
 	global show_register
 
@@ -450,7 +351,6 @@ def draw_register_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
-# Draws sound button:
 def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
 	global sound_on, sound_key_pressed
 
@@ -483,7 +383,6 @@ def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
 		sound_key_pressed = False
 	return mouse_clicked
 
-# Draws sound button:
 def draw_music_button(mouse_x, mouse_y, mouse_clicked):
 	global music_on, music_key_pressed
 
@@ -513,7 +412,6 @@ def draw_music_button(mouse_x, mouse_y, mouse_clicked):
 		music_key_pressed = False
 	return mouse_clicked
 
-# Draws info button:
 def draw_info_button(mouse_x, mouse_y, mouse_clicked):
 	global show_instruction
 
@@ -527,7 +425,6 @@ def draw_info_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
-# Draws info button:
 def draw_shortcut_button(mouse_x, mouse_y, mouse_clicked):
 	global show_shortcut
 
@@ -541,154 +438,101 @@ def draw_shortcut_button(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked
 
-# Provides a hint by finding two matching tiles that can be connected:
-def get_hint(board):
-	hint = [] # stores two tuple
-	tiles_location = collections.defaultdict(list)
-	for i in range(board_row):
-		for j in range(board_column):
-			if board[i][j]:
-				tiles_location[board[i][j]].append((i, j))
-	for value, positions in tiles_location.items():	
-		n = len(positions)
-		for idx1 in range(n):
-			for idx2 in range(idx1 + 1, n):
-				pos1, pos2 = positions[idx1], positions[idx2]
-				
-				# Check connectivity using BFS
-				if bfs(board, pos1[0], pos1[1], pos2[0], pos2[1]):
-					hint.append(pos1)
-					hint.append(pos2)
-					return hint
-	return []
 
-# Checks if current level is complete:
-def is_level_complete(board):
-	for i in range(len(board)):
-		for j in range(len(board[0])):
-			if board[i][j] != 0: return False
-	return True
 
-# Modifies the board based on difficulty level:
-def update_difficulty(board, level, tile1_i, tile1_j, tile2_i, tile2_j):
-	if level == 2: #all card move up
-		for j in (tile1_j, tile2_j):
-			new_column = [0]
-			for i in range(board_row):
-				if board[i][j] != 0:
-					new_column.append(board[i][j])
-			while(len(new_column) < board_row): new_column.append(0)
-			for k in range(board_row):
-				board[k][j] = new_column[k]
-	if level == 3: #all card move down
-		for j in (tile1_j, tile2_j):
-			new_column = []
-			for i in range(board_row):
-				if board[i][j] != 0:
-					new_column.append(board[i][j])
-			while(len(new_column) < board_row - 1): new_column = [0] + new_column
-			new_column.append(0)
-			for k in range(board_row):
-				board[k][j] = new_column[k]
-	if level == 4: #all card move left
-		for i in (tile1_i, tile2_i):
-			new_row = [0]
-			for j in range(board_column):
-				if board[i][j] != 0:
-					new_row.append(board[i][j])
-			while(len(new_row) < board_column): new_row.append(0)
-			for k in range(board_column):
-				board[i][k] = new_row[k]
-	if level == 5: #all card move right
-		for i in (tile1_i, tile2_i):
-			new_row = []
-			for j in range(board_column):
-				if board[i][j] != 0:
-					new_row.append(board[i][j])
-			while len(new_row) < board_column - 1: new_row = [0] + new_row
-			new_row.append(0)
-			for k in range(board_column):
-				board[i][k] = new_row[k]
 
-# Randomly shuffles the board while keeping the same tiles:
-def reset_board(board):
-	current_tiles = []
-	for i in range(board_row):
-		for j in range(board_column):
-			if board[i][j]: current_tiles.append(board[i][j])
-	tmp = current_tiles[:]
-	while tmp == current_tiles:
-		random.shuffle(current_tiles)
-	k = 0
-	for i in range(board_row):
-		for j in range(board_column):
-			if board[i][j]:
-				board[i][j] = current_tiles[k]
-				k += 1
-	return board
 
-# Checks if the player has run out of time:
-def check_time():
-	global lives, remaining_time, curr_remaining_time
-	if show_paused: 
-		return 2	
-	# check game lost
-	if curr_remaining_time - (GAME_TIME - remaining_time) < 0: # time up
-		curr_remaining_time = remaining_time = GAME_TIME
-		if lives <= 0: 
-			return 0
-		return 1
-	return 2
-
-# Creates a dimmed overlay effect on the screen:
+# Draws game panels:
 def show_dim_screen():
 	dim_screen = pg.Surface(screen.get_size(), pg.SRCALPHA)
 	pg.draw.rect(dim_screen, (0, 0, 0, 220), dim_screen.get_rect())
 	screen.blit(dim_screen, (0, 0))
 
 def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
+	global leaderboard_start, leaderboard_size
 	show_dim_screen()
-	font = pg.font.Font(None, 36)
-	title = font.render("Leaderboard", True, (225, 225, 225))
-	screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 50))
-	instruct_rect = INSTRUCTION_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	leaderboard_rect = LEADERBOARD_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	screen.blit(LEADERBOARD_PANEL, leaderboard_rect)
+ 
+	up_rect = UP_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.top + 250))
+	screen.blit(UP_BUTTON, up_rect)
+	down_rect = DOWN_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.bottom - 150))
+	screen.blit(DOWN_BUTTON, down_rect)
+	left_rect = LEFT_BUTTON.get_rect(center=(leaderboard_rect.centerx - 150, leaderboard_rect.bottom - 50))
+	screen.blit(LEFT_BUTTON, left_rect)
+	right_rect = RIGHT_BUTTON.get_rect(center=(leaderboard_rect.centerx + 150, leaderboard_rect.bottom - 50))
+	screen.blit(RIGHT_BUTTON, right_rect)
 
-
-	exit_rect = EXIT_BUTTON.get_rect(topright=(instruct_rect.right - 10, instruct_rect.top + 30))
+	exit_rect = EXIT_BUTTON.get_rect(topright=(leaderboard_rect.right - 10, leaderboard_rect.top + 30))
 	screen.blit(EXIT_BUTTON, exit_rect)
 
 	show_leaderboard = True
-
-	leaderboard = load_leaderboard()
-	y_offset = 100
-	for i, (name, highscore, lives, remaining_time) in enumerate(leaderboard):
-		text = f"{i + 1}. {name} - Score: {highscore}, Lives: {lives}, Time: {remaining_time}"
-		text_surface = font.render(text, True, (225, 225, 225))
-		screen.blit(text_surface, (100, y_offset))
-		y_offset += 40
+	leaderboard = list(enumerate(load_leaderboard()))
+	y_offset = 300
+	max_display = 4
+ 
+	size_text = FONT_COMICSANSMS.render(f"{leaderboard_size.upper()} BOARD RANKINGS", True, (0, 0, 0))
+	size_rect = size_text.get_rect(center=(SCREEN_WIDTH // 2, leaderboard_rect.top + 250))
+	screen.blit(size_text, size_rect)
+ 
+	for i, (name, highscore, lives, spent_time, level) in leaderboard[leaderboard_start:leaderboard_start + max_display]:
+		text = f"{i + 1}. {name} - {highscore if highscore is not None else "N/A"} (Level: {level if level is not None else "N/A"} - Lives: {lives if lives is not None else "N/A"} - Time: {convert_time(spent_time) if spent_time is not None else "N/A"})"
+		text_surface = FONT_ARIAL.render(text, True, (0, 0, 0))
+		text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, leaderboard_rect.top + y_offset))
+		
+		screen.blit(text_surface, text_rect)
+		y_offset += 45
 
 	if exit_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
 		if mouse_clicked:
 			mouse_clicked = False
 			show_leaderboard = False
+			leaderboard_size = "small"
+			leaderboard_start = 0
+			click_sound.play()
+   
+	elif up_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(UP_BUTTON, up_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			leaderboard_start = max(0, leaderboard_start - 1)
+			click_sound.play()
+   
+	elif down_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(DOWN_BUTTON, down_rect, (60, 60, 60))
+		if mouse_clicked:
+			mouse_clicked = False
+			leaderboard_start = min(len(leaderboard) - max_display, leaderboard_start + 1)
+			click_sound.play()
+   
+	elif left_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(LEFT_BUTTON, left_rect, (60, 60, 60))
+		if mouse_clicked:
+			if leaderboard_size == "small":
+				leaderboard_size = "large"
+			elif leaderboard_size == "medium":
+				leaderboard_size = "small"	
+			else:	
+				leaderboard_size = "medium"
+			mouse_clicked = False
+			click_sound.play()
+   
+	elif right_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(RIGHT_BUTTON, right_rect, (60, 60, 60))
+		if mouse_clicked:
+			if leaderboard_size == "small":
+				leaderboard_size = "medium"
+			elif leaderboard_size == "medium":	
+				leaderboard_size = "large"
+			else:
+				leaderboard_size = "small"
+			mouse_clicked = False
 			click_sound.play()
 	return mouse_clicked, show_leaderboard
 
-def draw_leaderboard(screen, leaderboard):
-    font = pg.font.Font(None, 36)
-    title = font.render("Leaderboard", True, (225, 225, 225))
-    screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 50))
-    
-    y_offset = 100
-    for i, (name, highscore, lives, remaining_time) in enumerate(leaderboard):
-        text = f"{i + 1}. {name} - Score: {highscore}, Lives: {lives}, Time: {remaining_time}"
-        text_surface = font.render(text, True, (225, 225, 225))
-        screen.blit(text_surface, (100, y_offset))
-        y_offset += 40
-
-# Displays the instruction panel:
 def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
+    
 	show_dim_screen()
 	instruct_rect = INSTRUCTION_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 	screen.blit(INSTRUCTION_PANEL, instruct_rect)
@@ -706,7 +550,6 @@ def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked, show_instruction
 
-# Displays the instruction panel:
 def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
 	show_dim_screen()
 	instruct_rect = SHORTCUT_PANEL.get_rect(center=(SCREEN_WIDTH // 2 + 65, SCREEN_HEIGHT // 2))
@@ -725,7 +568,6 @@ def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 	return mouse_clicked, show_shortcut
 
-# Displays the saveless warning panel:
 def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
 	show_dim_screen()
 	warning_saveless_rect = WARNING_SAVELESS_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
@@ -956,7 +798,7 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 	return mouse_clicked, input_active, name_input, password_input, show_register, error, players
 
 def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
-	global board_row, board_column, num_tile_on_board, num_same_tile, margin_x, margin_y, board, GAME_TIME, remaining_time, curr_remaining_time
+	global board_row, board_column, num_tile_on_board, num_same_tile, margin_x, margin_y, board, game_time, remaining_time, curr_remaining_time
 
 	# Board configuration:
 	# Small: 5 x 10
@@ -990,7 +832,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 			num_tile_on_board = 25
 			num_same_tile = 2
 			start_game = True
-			GAME_TIME = 120
+			game_time = TIME_SMALL
 			click_sound.play()
 
 	elif medium_rect.collidepoint(mouse_x, mouse_y):
@@ -1001,7 +843,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 			num_tile_on_board = 21
 			num_same_tile = 4
 			start_game = True
-			GAME_TIME = 180
+			game_time = TIME_MEDIUM
 			click_sound.play()
 
 	elif large_rect.collidepoint(mouse_x, mouse_y):
@@ -1012,7 +854,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 			num_tile_on_board = 21
 			num_same_tile = 6
 			start_game = True
-			GAME_TIME = 300
+			game_time = TIME_LARGE
 			click_sound.play()
 
 	elif exit_rect.collidepoint(mouse_x, mouse_y):
@@ -1025,14 +867,13 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 	if start_game:
 		margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
 		margin_y = (SCREEN_HEIGHT - TILE_HEIGHT * board_row) // 2 + 15
-		remaining_time = GAME_TIME
-		curr_remaining_time = GAME_TIME
+		remaining_time = game_time
+		curr_remaining_time = game_time
 		board = get_random_board()
 		return "start_game"
 	
 	return mouse_clicked, show_select_size
 
-# Displays the pause panel:
 def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 	global lives, space_key_pressed
  
@@ -1085,6 +926,240 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 
 	return mouse_clicked, show_paused
 
+
+
+
+
+# Drawing functions for main gameplay:
+# Draws game board:
+def draw_board(board):
+	for i in range(1, board_row - 1):
+		for j in range(1, board_column - 1):
+			if board[i][j] != 0:
+				screen.blit(LIST_TILE[board[i][j]], get_left_top_coords(i, j))
+
+# Draws a darkened version of an image:
+def draw_dark_image(image, image_rect, color):
+	dark_image = image.copy()
+	dark_image.fill(color, special_flags = pg.BLEND_RGB_SUB)
+	screen.blit(dark_image, image_rect)
+
+# Darkens and draws tiles that have been clicked:
+def draw_clicked_tiles(board, clicked_tiles):
+	for i, j in clicked_tiles:
+		x, y = get_left_top_coords(i, j)
+		try:
+			darkImage = LIST_TILE[board[i][j]].copy()
+			darkImage.fill((60, 60, 60), special_flags = pg.BLEND_RGB_SUB)
+			screen.blit(darkImage, (x, y))
+		except: pass
+
+# Draws blue border around a specified tile:
+def draw_border_tile(board, i, j):
+	x, y = get_left_top_coords(i, j)
+	pg.draw.rect(screen, (0, 0, 255),(x - 1, y - 3, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
+
+# Draws a red line connecting tiles:
+def draw_path(path):
+	for i in range(len(path) - 1):
+		start_pos = (get_center_coords(path[i][0], path[i][1]))
+		end_pos = (get_center_coords(path[i + 1][0], path[i + 1][1]))
+		pg.draw.line(screen, 'red', start_pos, end_pos, 4)
+		pg.display.update()
+	pg.time.wait(400)
+
+# Draws a green border around specific tiles as hints:
+def draw_hint(hint):
+	for i, j in hint:
+		x, y = get_left_top_coords(i, j)
+		pg.draw.rect(screen, (0, 255, 0),(x - +1, y - 2, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
+ 
+# Draws current number of lives, level and score:
+def draw_info(lives, level, score):
+	screen.blit(LIVES_IMAGE, (10, 12))
+	lives_count = FONT_PIKACHU.render(str(lives), True, 'white')
+	screen.blit(lives_count, (62, 12))
+
+	screen.blit(LIST_LEVEL[level - 1], (SCREEN_WIDTH - 70, 12))
+	
+	score_text = FONT_ARIAL.render("Score: " + str(score), True, 'yellow')
+	screen.blit(score_text, (200, 25))
+ 
+ 
+ 
+# Gameplay functions:
+# Provides a hint by finding two matching tiles that can be connected:
+def get_hint(board):
+	hint = [] # stores two tuple
+	tiles_location = collections.defaultdict(list)
+	for i in range(board_row):
+		for j in range(board_column):
+			if board[i][j]:
+				tiles_location[board[i][j]].append((i, j))
+	for value, positions in tiles_location.items():	
+		n = len(positions)
+		for idx1 in range(n):
+			for idx2 in range(idx1 + 1, n):
+				pos1, pos2 = positions[idx1], positions[idx2]
+				
+				# Check connectivity using BFS
+				if bfs(board, pos1[0], pos1[1], pos2[0], pos2[1]):
+					hint.append(pos1)
+					hint.append(pos2)
+					return hint
+	return []
+
+# Randomly shuffles the board while keeping the same tiles:
+def reset_board(board):
+	current_tiles = []
+	for i in range(board_row):
+		for j in range(board_column):
+			if board[i][j]: current_tiles.append(board[i][j])
+	tmp = current_tiles[:]
+	while tmp == current_tiles:
+		random.shuffle(current_tiles)
+	k = 0
+	for i in range(board_row):
+		for j in range(board_column):
+			if board[i][j]:
+				board[i][j] = current_tiles[k]
+				k += 1
+	return board
+
+# Checks if current level is complete:
+def is_level_complete(board):
+	for i in range(len(board)):
+		for j in range(len(board[0])):
+			if board[i][j] != 0: return False
+	return True
+
+# Modifies the board based on difficulty level:
+def update_difficulty(board, level, tile1_i, tile1_j, tile2_i, tile2_j):
+	if level == 2: #all card move up
+		for j in (tile1_j, tile2_j):
+			new_column = [0]
+			for i in range(board_row):
+				if board[i][j] != 0:
+					new_column.append(board[i][j])
+			while(len(new_column) < board_row): new_column.append(0)
+			for k in range(board_row):
+				board[k][j] = new_column[k]
+	if level == 3: #all card move down
+		for j in (tile1_j, tile2_j):
+			new_column = []
+			for i in range(board_row):
+				if board[i][j] != 0:
+					new_column.append(board[i][j])
+			while(len(new_column) < board_row - 1): new_column = [0] + new_column
+			new_column.append(0)
+			for k in range(board_row):
+				board[k][j] = new_column[k]
+	if level == 4: #all card move left
+		for i in (tile1_i, tile2_i):
+			new_row = [0]
+			for j in range(board_column):
+				if board[i][j] != 0:
+					new_row.append(board[i][j])
+			while(len(new_row) < board_column): new_row.append(0)
+			for k in range(board_column):
+				board[i][k] = new_row[k]
+	if level == 5: #all card move right
+		for i in (tile1_i, tile2_i):
+			new_row = []
+			for j in range(board_column):
+				if board[i][j] != 0:
+					new_row.append(board[i][j])
+			while len(new_row) < board_column - 1: new_row = [0] + new_row
+			new_row.append(0)
+			for k in range(board_column):
+				board[i][k] = new_row[k]
+
+# Checks if the player has run out of time:
+def check_time():
+	global lives, remaining_time, curr_remaining_time
+	if show_paused: 
+		return 2	
+	# check game lost
+	if curr_remaining_time - (game_time - remaining_time) < 0: # time up
+		curr_remaining_time = remaining_time = game_time
+		if lives <= 0: 
+			return 0
+		return 1
+	return 2
+
+# Generates a random shuffled game board:
+def get_random_board():
+	list_index_tiles = list(range(1, NUM_TILE + 1)) 
+	random.shuffle(list_index_tiles)
+	list_index_tiles = list_index_tiles[:num_tile_on_board] * num_same_tile 
+	random.shuffle(list_index_tiles)
+	board = [[0 for _ in range(board_column)] for _ in range(board_row)]
+	k = 0
+	for i in range(1, board_row - 1):
+		for j in range(1, board_column - 1):
+			board[i][j] = list_index_tiles[k]
+			k += 1
+	return board
+
+# Draws a time bar:
+def draw_time_bar(start_time):
+	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
+	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2)
+	current_time = time.time()
+	 # ratio between remaining time and total time
+	if show_paused:
+		if not time_start_paused: 
+			time_start_paused = time.time()
+
+	else:
+		if time_start_paused:
+			time_paused += current_time - time_start_paused
+		time_start_paused = 0
+
+		curr_remaining_time = game_time - (current_time - start_time - time_paused) + bonus_time
+		if curr_remaining_time > game_time:
+			bonus_time -= curr_remaining_time - game_time
+			curr_remaining_time = game_time
+      
+  
+	real_remaining_time = curr_remaining_time - (game_time - remaining_time)
+	timeOut = real_remaining_time / game_time
+	time_text = FONT_PIXEL.render(convert_time(real_remaining_time), True, (255, 255, 255))
+	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
+	screen.blit(time_text, time_rect)
+
+	# Calculate inner bar width
+	inner_width = max(0, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
+    
+    # Interpolate color from green to red based on remaining time
+	green = (0, 255, 0)
+	red = (255, 0, 0)
+	color_factor = 1 - timeOut
+	bar_color = interpolate_color(green, red, color_factor)
+    
+    # If time is actually up, set width to 0
+	if timeOut <= 0:
+		inner_width = 0
+    
+	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
+	innerSize = (inner_width, TIME_BAR_HEIGHT - 4)
+    
+	pg.draw.rect(screen, bar_color, (innerPos, innerSize))
+  
+	# Check if remaining time in the time bar is 10 seconds or less and play warning sound
+	if real_remaining_time <= 10:
+		if not warning_sound_played:
+			warning_sound.play()
+			warning_sound_played = True
+	else:
+		if warning_sound_played:
+			warning_sound.stop()
+			warning_sound_played = False
+
+
+
+
+
 # Sign-in system functions:
 def load_players():
     try:
@@ -1104,15 +1179,47 @@ def save_players(players):
     with open('players.json', 'w') as f:
         json.dump(players, f, indent = 2)
 
-def update_players(board, level, lives, curr_remaining_time, remaining_time, score):
-	global current_player
+def update_players(command = ""):
+	players = load_players()
+	if current_player != "[Guest]":
+		if command == "RESET":
+			players[current_player] = {"password": players[current_player]["password"], "save": [None, 1, 3, [None, None, None, None, None], 0], "highscore": players[current_player]["highscore"]}
+		else:	
+			players = load_players()
+			players[current_player]["save"][0] = board
+			players[current_player]["save"][1] = level
+			players[current_player]["save"][2] = lives
+			players[current_player]["save"][3][level - 1] = curr_remaining_time - (game_time - remaining_time)
+			players[current_player]["save"][4] = score
+
+		save_players(players)
+  
+def update_highscore(lives, score):
 	if current_player != "[Guest]":
 		players = load_players()
-		players[current_player]["save"][0] = board
-		players[current_player]["save"][1] = level
-		players[current_player]["save"][2] = lives
-		players[current_player]["save"][3] = curr_remaining_time - (GAME_TIME - remaining_time)
-		players[current_player]["save"][4] = score
+
+		if board_row == 7 and board_column == 12:
+			game_size = "small"
+
+		elif board_row == 9 and board_column == 14:
+			game_size = "medium"
+
+		elif board_row == 11 and board_column == 16:
+			game_size = "large"
+
+		current_highscore = players[current_player]["highscore"][game_size].copy()
+		current_highscore[2] = -current_highscore[2] if current_highscore[2] is not None else None # Lower spent time is better
+
+		spent_time = [game_time - x if x is not None else 0 for x in players[current_player]["save"][3]]
+		total_spent_time = sum(spent_time)
+  
+		if players[current_player]["highscore"][game_size][0] is None or [score, lives, -total_spent_time, level] > current_highscore:
+			players[current_player]["highscore"][game_size][0] = score
+			players[current_player]["highscore"][game_size][1] = lives
+			players[current_player]["highscore"][game_size][2] = total_spent_time
+			players[current_player]["highscore"][game_size][3] = level
+			
+	
 		save_players(players)
 
 def verify_player(name, password):
@@ -1123,42 +1230,49 @@ def verify_player(name, password):
 
 def add_player(name, password):
     players = load_players()
-    players[name] = {"password": password, "save": [None, 1, 3, GAME_TIME]}
+    players[name] = {"password": password, "save": [None, 1, 3, [None, None, None, None, None], 0], "highscore": {"small": [None, None, None, None], "medium": [None, None, None, None], "large": [None, None, None, None]}}
+    # save: [board, level, lives, spent_time, score]
+		# spent_time: [level1, level2, level3, level4, level5]
+	# highscore: [score, lives, spent_time, level]
     save_players(players)
+    
 
-def update_highscore(name, score, lives, remaining_time):
-    players = load_players()
-    if name in players:
-        current_highscore = players[name]["highscore"][0]
-        current_lives = players[name]["highscore"][1]
-        current_remaining_time = players[name]["highscore"][2]
+def reset_game_info():
+	global board, lives, level, remaining_time, curr_remaining_time, bonus_time, show_hint, score
+	board = None
+	lives = 3
+	level = 1
+	remaining_time = game_time
+	curr_remaining_time = game_time
+	bonus_time = 0
+	show_hint = False
+	score = 0
 
-        if (score > current_highscore or
-            (score == current_highscore and lives > current_lives) or
-            (score == current_highscore and lives == current_lives and remaining_time > current_remaining_time)):
-            players[name]["highscore"][0] = score
-            players[name]["highscore"][1] = lives
-            players[name]["highscore"][2] = remaining_time
-            save_players(players)
-
-# Leaderboard function:
 def load_leaderboard():
-    with open('players.json', 'r') as file:
-        players = json.load(file)
-    
-    leaderboard = []
-    for name, data in players.items():
-        highscore = data.get("highscore", 0)
-        lives = data.get("highscore", 1)
-        remaining_time = data.get("highscore", 2)
-        leaderboard.append((name, highscore, lives, remaining_time))
-    
-    leaderboard.sort(key=lambda x: (x[1], x[2], x[3]), reverse=True)
-    
-    return leaderboard
+	with open('players.json', 'r') as file:
+		players = json.load(file)
+
+	leaderboard = []
+	blank_leaderboard = []
+	for name, data in players.items():
+		highscore = data["highscore"][leaderboard_size][0]
+		lives = data["highscore"][leaderboard_size][1]
+		current_spent_time = data["highscore"][leaderboard_size][2]
+		level = data["highscore"][leaderboard_size][3]
+		if highscore is not None:
+			leaderboard.append((name, highscore, lives, current_spent_time, level))
+		else:
+			blank_leaderboard.append((name, highscore, lives, current_spent_time, level))
+
+	leaderboard.sort(key=lambda x: (x[1], x[2], -x[3]), reverse=True)
+	leaderboard += blank_leaderboard
+
+	return leaderboard
 
  
-# Displays the starting screen:
+ 
+ 
+# Main menu loop:
 def start_screen():
 	global sound_on, music_on, current_player, user_background, board_row, board_column, num_same_tile, num_tile_on_board, margin_x, margin_y, board, lives, level, remaining_time, curr_remaining_time
 	global show_warning_guest, show_warning_saveless, show_instruction, show_sign_in, show_select_size, show_register, show_shortcut, show_leaderboard
@@ -1341,24 +1455,15 @@ def start_screen():
 		leaderboard_button_rect = LEADERBOARD_BUTTON.get_rect(center=(40, 40))
 		screen.blit(LEADERBOARD_BUTTON, leaderboard_button_rect)
     
-		if leaderboard_button_rect.collidepoint(mouse_x, mouse_y):
-			draw_dark_image(LEADERBOARD_BUTTON, leaderboard_button_rect, (60, 60, 60))
-			if mouse_clicked:
-				mouse_clicked = False
-				leaderboard = load_leaderboard()
-				draw_leaderboard(screen, leaderboard)
-			pg.display.flip()
 		pg.display.flip()
 
-
-
-# Handles the main game loop where gameplay occurs:
+# Gameplay loop:
 def playing():
 	global level, lives, score, show_paused, time_start_paused, time_paused, bonus_time, show_hint, current_hint, board, lives, level, remaining_time
 
 	# Time variables:
 	show_paused = False
-	curr_remaining_time = GAME_TIME - (GAME_TIME - remaining_time)
+	curr_remaining_time = game_time - (game_time - remaining_time)
 	time_start_paused = 0
 	time_paused = 0
 	bonus_time = 0
@@ -1380,7 +1485,7 @@ def playing():
 		pg.draw.rect(dim_screen, (0, 0, 0, 150), dim_screen.get_rect())
 		screen.blit(dim_screen, (0, 0))
 		draw_board(board)
-		draw_lives(lives, level, score)
+		draw_info(lives, level, score)
 		draw_time_bar(start_time)
 		draw_clicked_tiles(board, clicked_tiles)
 
@@ -1395,13 +1500,8 @@ def playing():
 		# check event
 		for event in pg.event.get():
 			if event.type == pg.QUIT: 
-				current_time = time.time()
-				if time_start_paused:
-					time_paused += current_time - time_start_paused
-				elapsed_time = current_time - start_time - time_paused
-				curr_remaining_time = GAME_TIME - elapsed_time + bonus_time
 				
-				update_players(board, level, lives, curr_remaining_time, remaining_time, score)
+				update_players()
  
 				pg.quit()
 				sys.exit()
@@ -1492,12 +1592,11 @@ def playing():
 									pg.mixer.music.pause()
 									fade_speed = 2
 									alpha = 0
-									time_win = 10
 									tmp = time.time()
 									
 									win_sound.play(maxtime = 10000)
 									show_dim_screen()
-									while time.time() - tmp < 10:
+									while time.time() - tmp < TIME_VICTORY:
 										alpha += fade_speed
 										if alpha > 255: alpha = 255
 										tmp_image = WIN_BACKGROUND.copy()
@@ -1518,7 +1617,7 @@ def playing():
 		except: pass
 		pg.display.flip()
 
-# Incorporates all the above functions to run the game: 
+# Main game function:
 def main():
 	#init pygame and module
 	global level, lives, board, curr_remaining_time, remaining_time, show_hint
@@ -1530,13 +1629,14 @@ def main():
 			random.shuffle(LIST_BACKGROUND)
 			signal = playing()
 			if signal == "start_screen":
-				update_players(board, level, lives, curr_remaining_time, remaining_time, score)
-				update_highscore(current_player, score, lives, remaining_time)
+				update_players()
+				update_highscore(lives, score)
 				reset_game_info()
 				break
 			elif signal == "next":
+				update_players()
 				board = get_random_board()
-				remaining_time = GAME_TIME
+				remaining_time = game_time
 				level += 1
 				pg.time.wait(300)
 				pg.mixer.music.play()
@@ -1544,10 +1644,11 @@ def main():
 				lives -= 1
 				show_hint = False
 				board = get_random_board()
-				remaining_time = GAME_TIME
+				remaining_time = game_time
 			elif signal == "game_over":
-				update_players(None, 1, 3, GAME_TIME, GAME_TIME)
-				update_highscore(current_player, score, lives, remaining_time)
+				update_players()
+				update_highscore(lives, score)	
+				update_players("RESET")
 				show_dim_screen()
 				game_over_sound.play()
 				pg.mixer.music.pause()
@@ -1560,13 +1661,13 @@ def main():
 				pg.mixer.music.unpause()
 				break
 			elif signal == "victory":
-				update_players(None, 1, 3, GAME_TIME, GAME_TIME)
-				update_highscore(current_player, score, lives, remaining_time)
+				update_players()
+				update_highscore(lives, score)	
+				update_players("RESET")
 				reset_game_info()
 				break
-		leaderboard = load_leaderboard()
-		draw_leaderboard(screen, leaderboard)
 		pg.display.flip()
+
 
 if __name__ == '__main__':
 	main()
