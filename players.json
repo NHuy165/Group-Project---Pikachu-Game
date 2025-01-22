@@ -1,29 +1,182 @@
 {
-  "HUY": {
+  "TEST1": {
     "password": "",
     "save": [
       null,
       1,
       3,
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       0
-    ]
+    ],
+    "highscore": {
+      "small": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "medium": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "large": [
+        null,
+        null,
+        null,
+        null
+      ]
+    }
   },
-  "HUY2": {
+  "TEST2": {
     "password": "",
     "save": [
       null,
       1,
       3,
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       0
-    ]
+    ],
+    "highscore": {
+      "small": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "medium": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "large": [
+        null,
+        null,
+        null,
+        null
+      ]
+    }
   },
-  "HUY3": {
+  "TEST3": {
     "password": "",
     "save": [
       null,
       1,
       3,
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       0
-    ]
+    ],
+    "highscore": {
+      "small": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "medium": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "large": [
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "TEST4": {
+    "password": "",
+    "save": [
+      null,
+      1,
+      3,
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      0
+    ],
+    "highscore": {
+      "small": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "medium": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "large": [
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "TEST5": {
+    "password": "",
+    "save": [
+      null,
+      1,
+      3,
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      0
+    ],
+    "highscore": {
+      "small": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "medium": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "large": [
+        null,
+        null,
+        null,
+        null
+      ]
+    }
   }
 }
