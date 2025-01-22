@@ -46,6 +46,7 @@ TIME_END = 6 # Game over screen time
 
 # Font loading:
 FONT_COMICSANSMS = pg.font.SysFont('dejavusans', 40)
+FONT_COMICSANSMS.set_bold(True)
 FONT_TUROK = pg.font.SysFont('timesnewroman', 60)
 FONT_PIKACHU = pg.font.Font("assets/font/pikachu.otf", 50)
 FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 25)
@@ -72,6 +73,8 @@ SHORTCUT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/shortcu
 LEADERBOARD_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/leaderboard.png"), (50, 50))
 UP_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/up.png"), (50, 50))
 DOWN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/down.png"), (50, 50))
+LEFT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/left.png"), (50, 50))
+RIGHT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/right.png"), (50, 50))
 WARNING_GUEST_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_guest_panel.png"), (700, 469)).convert_alpha()
 WARNING_SAVELESS_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_saveless_panel.png"), (700, 469)).convert_alpha()
 SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
@@ -125,13 +128,16 @@ warning_sound_played = False	# Variable to track if the warning sound has been p
 # Working with sign-in and register systems:
 current_player = "[Guest]"
 user_background = pg.image.load("assets/images/button/user_background.png")
-leaderboard_start = 0
 NAME_LIMIT = 20
 PASSWORD_LIMIT = 20
 NAME_HITBOX_SIGN_IN = pg.Rect(570, 286, 345, 41)
 PASSWORD_HITBOX_SIGN_IN = pg.Rect(570, 383, 345, 41)
 NAME_HITBOX_REGISTER = pg.Rect(570, 295, 345, 42)
 PASSWORD_HITBOX_REGISTER = pg.Rect(570, 395, 345, 42)
+
+# Leaderboard variables:
+leaderboard_start = 0
+leaderboard_size = "small"
 
 # Working with space, hint, music and sound keys
 space_key_pressed = False
@@ -443,7 +449,7 @@ def show_dim_screen():
 	screen.blit(dim_screen, (0, 0))
 
 def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
-	global leaderboard_start   
+	global leaderboard_start, leaderboard_size
 	show_dim_screen()
 	leaderboard_rect = LEADERBOARD_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 	screen.blit(LEADERBOARD_PANEL, leaderboard_rect)
@@ -452,14 +458,22 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 	screen.blit(UP_BUTTON, up_rect)
 	down_rect = DOWN_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.bottom - 150))
 	screen.blit(DOWN_BUTTON, down_rect)
+	left_rect = LEFT_BUTTON.get_rect(center=(leaderboard_rect.centerx - 150, leaderboard_rect.bottom - 50))
+	screen.blit(LEFT_BUTTON, left_rect)
+	right_rect = RIGHT_BUTTON.get_rect(center=(leaderboard_rect.centerx + 150, leaderboard_rect.bottom - 50))
+	screen.blit(RIGHT_BUTTON, right_rect)
 
 	exit_rect = EXIT_BUTTON.get_rect(topright=(leaderboard_rect.right - 10, leaderboard_rect.top + 30))
 	screen.blit(EXIT_BUTTON, exit_rect)
 
 	show_leaderboard = True
 	leaderboard = list(enumerate(load_leaderboard()))
-	y_offset = 270
+	y_offset = 300
 	max_display = 4
+ 
+	size_text = FONT_COMICSANSMS.render(f"{leaderboard_size.upper()} BOARD RANKINGS", True, (0, 0, 0))
+	size_rect = size_text.get_rect(center=(SCREEN_WIDTH // 2, leaderboard_rect.top + 250))
+	screen.blit(size_text, size_rect)
  
 	for i, (name, highscore, lives, spent_time, level) in leaderboard[leaderboard_start:leaderboard_start + max_display]:
 		text = f"{i + 1}. {name} - {highscore if highscore is not None else "N/A"} (Level: {level if level is not None else "N/A"} - Lives: {lives if lives is not None else "N/A"} - Time: {convert_time(spent_time) if spent_time is not None else "N/A"})"
@@ -474,6 +488,8 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_leaderboard = False
+			leaderboard_size = "small"
+			leaderboard_start = 0
 			click_sound.play()
    
 	elif up_rect.collidepoint(mouse_x, mouse_y):
@@ -488,6 +504,30 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			leaderboard_start = min(len(leaderboard) - max_display, leaderboard_start + 1)
+			click_sound.play()
+   
+	elif left_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(LEFT_BUTTON, left_rect, (60, 60, 60))
+		if mouse_clicked:
+			if leaderboard_size == "small":
+				leaderboard_size = "large"
+			elif leaderboard_size == "medium":
+				leaderboard_size = "small"	
+			else:	
+				leaderboard_size = "medium"
+			mouse_clicked = False
+			click_sound.play()
+   
+	elif right_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(RIGHT_BUTTON, right_rect, (60, 60, 60))
+		if mouse_clicked:
+			if leaderboard_size == "small":
+				leaderboard_size = "medium"
+			elif leaderboard_size == "medium":	
+				leaderboard_size = "large"
+			else:
+				leaderboard_size = "small"
+			mouse_clicked = False
 			click_sound.play()
 	return mouse_clicked, show_leaderboard
 
@@ -1158,17 +1198,26 @@ def update_highscore(lives, score):
 	if current_player != "[Guest]":
 		players = load_players()
 
-		current_highscore_score = players[current_player]["highscore"][0]
-		current_highscore_lives = players[current_player]["highscore"][1]
-		current_highscore_spent_time = players[current_player]["highscore"][2]
+		if board_row == 7 and board_column == 12:
+			game_size = "small"
+
+		elif board_row == 9 and board_column == 14:
+			game_size = "medium"
+
+		elif board_row == 11 and board_column == 16:
+			game_size = "large"
+
+		current_highscore = players[current_player]["highscore"][game_size].copy()
+		current_highscore[2] = -current_highscore[2] if current_highscore[2] is not None else None # Lower spent time is better
+
 		spent_time = [game_time - x if x is not None else 0 for x in players[current_player]["save"][3]]
-		current_spent_time = sum(spent_time)
+		total_spent_time = sum(spent_time)
   
-		if players[current_player]["highscore"][0] is None or (score > current_highscore_score) or (score == current_highscore_score and lives > current_highscore_lives) or (score == current_highscore_score and lives == current_highscore_lives and current_spent_time < current_highscore_spent_time):
-			players[current_player]["highscore"][0] = score
-			players[current_player]["highscore"][1] = lives
-			players[current_player]["highscore"][2] = current_spent_time
-			players[current_player]["highscore"][3] = level
+		if players[current_player]["highscore"][game_size][0] is None or [score, lives, -total_spent_time, level] > current_highscore:
+			players[current_player]["highscore"][game_size][0] = score
+			players[current_player]["highscore"][game_size][1] = lives
+			players[current_player]["highscore"][game_size][2] = total_spent_time
+			players[current_player]["highscore"][game_size][3] = level
 			
 	
 		save_players(players)
@@ -1181,8 +1230,12 @@ def verify_player(name, password):
 
 def add_player(name, password):
     players = load_players()
-    players[name] = {"password": password, "save": [None, 1, 3, [None, None, None, None, None], 0], "highscore": [None, None, None, None]}
+    players[name] = {"password": password, "save": [None, 1, 3, [None, None, None, None, None], 0], "highscore": {"small": [None, None, None, None], "medium": [None, None, None, None], "large": [None, None, None, None]}}
+    # save: [board, level, lives, spent_time, score]
+		# spent_time: [level1, level2, level3, level4, level5]
+	# highscore: [score, lives, spent_time, level]
     save_players(players)
+    
 
 def reset_game_info():
 	global board, lives, level, remaining_time, curr_remaining_time, bonus_time, show_hint, score
@@ -1202,10 +1255,10 @@ def load_leaderboard():
 	leaderboard = []
 	blank_leaderboard = []
 	for name, data in players.items():
-		highscore = data["highscore"][0]
-		lives = data["highscore"][1]
-		current_spent_time = data["highscore"][2]
-		level = data["highscore"][3]
+		highscore = data["highscore"][leaderboard_size][0]
+		lives = data["highscore"][leaderboard_size][1]
+		current_spent_time = data["highscore"][leaderboard_size][2]
+		level = data["highscore"][leaderboard_size][3]
 		if highscore is not None:
 			leaderboard.append((name, highscore, lives, current_spent_time, level))
 		else:
