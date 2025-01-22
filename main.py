@@ -1374,6 +1374,9 @@ def start_screen():
 						elif name_input == "":
 							error = "Cannot register with empty username"
 							fail_sound.play()
+						elif password_input == "":
+							error = "Cannot register with empty password"
+							fail_sound.play()
 						else:
 							add_player(name_input, password_input)
 							show_register = False
