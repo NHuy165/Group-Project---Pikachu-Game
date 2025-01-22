@@ -207,7 +207,7 @@ def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
 			if mouse_clicked or (keys[pg.K_SPACE] and not space_key_pressed):
 				mouse_clicked = False
 				show_paused = True
-				click_sound.play()
+				# click_sound.play()
 				space_key_pressed = True  # Set the flag to indicate the space key is pressed
 	else:
 		space_key_pressed = False  # Reset the flag when the space key is released
@@ -489,14 +489,14 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			leaderboard_start = max(0, leaderboard_start - 1)
-			click_sound.play()
+			# click_sound.play()
    
 	elif down_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(DOWN_BUTTON, down_rect, (60, 60, 60))
 		if mouse_clicked:
 			mouse_clicked = False
 			leaderboard_start = min(len(leaderboard) - max_display, leaderboard_start + 1)
-			click_sound.play()
+			# click_sound.play()
    
 	elif left_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(LEFT_BUTTON, left_rect, (60, 60, 60))
@@ -508,7 +508,7 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			else:	
 				leaderboard_size = "medium"
 			mouse_clicked = False
-			click_sound.play()
+			# click_sound.play()
    
 	elif right_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(RIGHT_BUTTON, right_rect, (60, 60, 60))
@@ -520,7 +520,7 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			else:
 				leaderboard_size = "small"
 			mouse_clicked = False
-			click_sound.play()
+			# click_sound.play()
 	return mouse_clicked, show_leaderboard
 
 def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
