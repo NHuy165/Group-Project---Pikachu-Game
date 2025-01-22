@@ -70,11 +70,11 @@ SOUND_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/sound.png"
 MUSIC_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/music.png"), (50, 50))
 INFO_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/info.png"), (50, 50))
 SHORTCUT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/shortcut.png"), (50, 50))
-LEADERBOARD_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/leaderboard.png"), (50, 50))
+LEADERBOARD_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/leaderboard.png"), (200, 100))
 UP_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/up.png"), (50, 50))
 DOWN_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/down.png"), (50, 50))
-LEFT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/left.png"), (50, 50))
-RIGHT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/right.png"), (50, 50))
+LEFT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/left.png"), (70, 70))
+RIGHT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/right.png"), (70, 70))
 WARNING_GUEST_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_guest_panel.png"), (700, 469)).convert_alpha()
 WARNING_SAVELESS_PANEL = pg.transform.scale(pg.image.load("assets/images/button/warning_saveless_panel.png"), (700, 469)).convert_alpha()
 SIGN_IN_PANEL = pg.transform.scale(pg.image.load("assets/images/button/sign_in_panel.png"), (700, 469)).convert_alpha()
@@ -238,7 +238,7 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked):
 
 def draw_leaderboard_button(mouse_x, mouse_y, mouse_clicked):
 	global show_leaderboard
-	leaderboard_rect = LEADERBOARD_BUTTON.get_rect(center=(40, 40))
+	leaderboard_rect = LEADERBOARD_BUTTON.get_rect(center=(120, 80))
 	screen.blit(LEADERBOARD_BUTTON, leaderboard_rect)
 
 	if leaderboard_rect.collidepoint(mouse_x, mouse_y):
@@ -391,11 +391,13 @@ def draw_music_button(mouse_x, mouse_y, mouse_clicked):
 			music_key_pressed = True
 			if music_on:
 				music_on = False
-				pg.mixer.music.set_volume(0)
+				pg.mixer.music.pause()
+				# pg.mixer.music.set_volume(0)
 
 			else:
 				music_on = True
-				pg.mixer.music.set_volume(0.1)
+				pg.mixer.music.unpause()
+				# pg.mixer.music.set_volume(0.4)
 	
 			click_sound.play()
 	else:
@@ -441,16 +443,16 @@ def show_dim_screen():
 def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 	global leaderboard_start, leaderboard_size
 	show_dim_screen()
-	leaderboard_rect = LEADERBOARD_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+	leaderboard_rect = LEADERBOARD_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
 	screen.blit(LEADERBOARD_PANEL, leaderboard_rect)
  
-	up_rect = UP_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.top + 250))
+	up_rect = UP_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.top + 290))
 	screen.blit(UP_BUTTON, up_rect)
-	down_rect = DOWN_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.bottom - 150))
+	down_rect = DOWN_BUTTON.get_rect(center=(leaderboard_rect.centerx + 450, leaderboard_rect.bottom - 200))
 	screen.blit(DOWN_BUTTON, down_rect)
-	left_rect = LEFT_BUTTON.get_rect(center=(leaderboard_rect.centerx - 150, leaderboard_rect.bottom - 50))
+	left_rect = LEFT_BUTTON.get_rect(center=(leaderboard_rect.centerx - 150, leaderboard_rect.bottom - 30))
 	screen.blit(LEFT_BUTTON, left_rect)
-	right_rect = RIGHT_BUTTON.get_rect(center=(leaderboard_rect.centerx + 150, leaderboard_rect.bottom - 50))
+	right_rect = RIGHT_BUTTON.get_rect(center=(leaderboard_rect.centerx + 150, leaderboard_rect.bottom - 30))
 	screen.blit(RIGHT_BUTTON, right_rect)
 
 	exit_rect = EXIT_BUTTON.get_rect(topright=(leaderboard_rect.right - 10, leaderboard_rect.top + 30))
