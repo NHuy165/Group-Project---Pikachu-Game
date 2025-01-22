@@ -482,7 +482,7 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			show_leaderboard = False
 			leaderboard_size = "small"
 			leaderboard_start = 0
-			click_sound.play()
+			# click_sound.play()
    
 	elif up_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(UP_BUTTON, up_rect, (60, 60, 60))
@@ -539,12 +539,12 @@ def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_instruction = False
-			click_sound.play()
+			# click_sound.play()
 	return mouse_clicked, show_instruction
 
 def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
 	show_dim_screen()
-	instruct_rect = SHORTCUT_PANEL.get_rect(center=(SCREEN_WIDTH // 2 + 65, SCREEN_HEIGHT // 2))
+	instruct_rect = SHORTCUT_PANEL.get_rect(center=(SCREEN_WIDTH // 2 + 15, SCREEN_HEIGHT // 2))
 	screen.blit(SHORTCUT_PANEL, instruct_rect)
 
 	exit_rect = EXIT_BUTTON.get_rect(topright=(instruct_rect.right - 10, instruct_rect.top + 30))
@@ -557,7 +557,7 @@ def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_shortcut = False
-			click_sound.play()
+			# click_sound.play()
 	return mouse_clicked, show_shortcut
 
 def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
@@ -585,7 +585,7 @@ def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_warning_saveless = False
-			click_sound.play()
+			# click_sound.play()
 
 	return mouse_clicked, show_warning_saveless, show_select_size
 
@@ -614,7 +614,7 @@ def draw_panel_warning_guest(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_warning_guest = False
-			click_sound.play()
+			# click_sound.play()
 
 	return mouse_clicked, show_warning_guest, show_select_size
 
@@ -627,7 +627,7 @@ def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input
 	exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
 	screen.blit(EXIT_BUTTON, exit_rect)
 
-	OK_rect = OK_BUTTON.get_rect(center=(panel_rect.centerx, panel_rect.bottom - 100))
+	OK_rect = OK_BUTTON.get_rect(center=(panel_rect.centerx, panel_rect.bottom - 50))
 	screen.blit(OK_BUTTON, OK_rect)
 
 	show_sign_in = True
@@ -640,7 +640,7 @@ def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input
 			error = ""  
 			name_input = ""  
 			password_input = ""
-			click_sound.play()
+			# click_sound.play()
    
 	elif OK_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(OK_BUTTON, OK_rect, (60, 60, 60))
@@ -699,7 +699,7 @@ def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input
 	# Draw error message if any
 	if error:
 		error_text = FONT_PIXEL.render(error, True, (255, 0, 0)) 
-		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 150))
+		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 140))
 		screen.blit(error_text, error_rect)
 
 	return mouse_clicked, input_active, name_input, password_input, show_sign_in, error
@@ -712,20 +712,20 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 	exit_rect = EXIT_BUTTON.get_rect(topright=(panel_rect.right - 10, panel_rect.top + 30))
 	screen.blit(EXIT_BUTTON, exit_rect)
 
-	OK_rect = OK_BUTTON.get_rect(center=(panel_rect.centerx, panel_rect.bottom - 100))
+	OK_rect = OK_BUTTON.get_rect(center=(panel_rect.centerx, panel_rect.bottom - 40))
 	screen.blit(OK_BUTTON, OK_rect)
 
 	show_register = True
 
 	if exit_rect.collidepoint(mouse_x, mouse_y):
-		draw_dark_image(OK_BUTTON, OK_rect, (60, 60, 60))
+		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
 		if mouse_clicked:
 			mouse_clicked = False
 			show_register = False
 			error = "" 
 			name_input = ""  
 			password_input = ""
-			click_sound.play()
+			# click_sound.play()
 
 	elif OK_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(OK_BUTTON, OK_rect, (60, 60, 60))
@@ -740,6 +740,9 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 					fail_sound.play()
 				elif name_input == "":
 					error = "Cannot register with empty username"
+					fail_sound.play()
+				elif password_input == "":
+					error = "Cannot register with empty password"
 					fail_sound.play()
 				else:
 					add_player(name_input, password_input)
@@ -784,7 +787,7 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 	# Draw error message if any
 	if error:
 		error_text = FONT_PIXEL.render(error, True, (255, 0, 0)) 
-		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 105))
+		error_rect = error_text.get_rect(center=(panel_rect.centerx, panel_rect.centery + 135))
 		screen.blit(error_text, error_rect)
 
 	return mouse_clicked, input_active, name_input, password_input, show_register, error, players
@@ -854,7 +857,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_select_size = False
-			click_sound.play()
+			# click_sound.play()
 
 	if start_game:
 		margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
