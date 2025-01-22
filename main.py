@@ -1441,9 +1441,6 @@ def start_screen():
 				return 
 			else:
 				mouse_clicked, show_select_size = select
-
-		leaderboard_button_rect = LEADERBOARD_BUTTON.get_rect(center=(40, 40))
-		screen.blit(LEADERBOARD_BUTTON, leaderboard_button_rect)
     
 		pg.display.flip()
 
