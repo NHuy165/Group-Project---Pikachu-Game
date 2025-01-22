@@ -51,6 +51,8 @@ FONT_TUROK = pg.font.SysFont('timesnewroman', 60)
 FONT_PIKACHU = pg.font.Font("assets/font/pikachu.otf", 50)
 FONT_ARIAL = pg.font.Font('assets/font/Folty-Bold.ttf', 25)
 FONT_PIXEL = pg.font.Font('assets/font/PixeloidSans.ttf', 25)
+FONT_PIXEL_BOLD = pg.font.Font('assets/font/PixeloidSansBold.ttf', 27)
+FONT_PIXEL_SMALL = pg.font.Font('assets/font/PixeloidSans.ttf', 20)
 
 # Backgrounds:
 START_SCREEN_BACKGOUND = pg.transform.scale(pg.image.load("assets/images/background/b1g.jpg"), (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -463,13 +465,13 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 	y_offset = 300
 	max_display = 4
  
-	size_text = FONT_COMICSANSMS.render(f"{leaderboard_size.upper()} BOARD RANKINGS", True, (0, 0, 0))
+	size_text = FONT_PIXEL_BOLD.render(f"{leaderboard_size.upper()} BOARD RANKINGS", True, (0, 0, 0))
 	size_rect = size_text.get_rect(center=(SCREEN_WIDTH // 2, leaderboard_rect.top + 250))
 	screen.blit(size_text, size_rect)
  
 	for i, (name, highscore, lives, spent_time, level) in leaderboard[leaderboard_start:leaderboard_start + max_display]:
 		text = f"{i + 1}. {name} - {highscore if highscore is not None else "N/A"} (Level: {level if level is not None else "N/A"} - Lives: {lives if lives is not None else "N/A"} - Time: {convert_time(spent_time) if spent_time is not None else "N/A"})"
-		text_surface = FONT_ARIAL.render(text, True, (0, 0, 0))
+		text_surface = FONT_PIXEL_SMALL.render(text, True, (0, 0, 0))
 		text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, leaderboard_rect.top + y_offset))
 		
 		screen.blit(text_surface, text_rect)
