@@ -90,7 +90,6 @@ INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instr
 SHORTCUT_PANEL = pg.transform.scale(pg.image.load("assets/images/button/shortcut_panel.png"), (1000, 500)).convert_alpha()
 LEADERBOARD_PANEL = pg.transform.scale(pg.image.load("assets/images/button/leaderboard_panel.png"), (1000, 600)).convert_alpha()
 
-
 # Game UI:
 EXIT_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/close.png"), (60, 60))
 REPLAY_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/replay.png"), (50, 50))
@@ -107,7 +106,6 @@ pg.mixer.music.load("assets/music/background1.mp3")
 pg.mixer.music.set_volume(0.4)
 pg.mixer.music.play(-1, 0.0, 5000)
 music_on = True
-
 
 # Sounds:
 click_sound = pg.mixer.Sound("assets/sound/click_sound.mp3")
@@ -164,36 +162,11 @@ TIME_SMALL = 120
 TIME_MEDIUM = 180
 TIME_LARGE = 300
 
-# Miscellaneous functions:
-# Gets top-left corner coordinates of a tile based on its row (i) and column (j):
-def get_left_top_coords(i, j): 
-	x = j * TILE_WIDTH + margin_x
-	y = i * TILE_HEIGHT + margin_y
-	return x, y
 
-# Gets center coordinates of a tile based on its row (i) and column (j):
-def get_center_coords(i, j): 
-	x, y = get_left_top_coords(i, j)
-	return x + TILE_WIDTH // 2, y + TILE_HEIGHT // 2
 
-# Calculates row and column of tile clicked based on position of mouse click:
-def get_index_at_mouse(x, y): 
-	if x < margin_x or y < margin_y: return None, None
-	return (y - margin_y) // TILE_HEIGHT, (x - margin_x) // TILE_WIDTH
 
-# Function to interpolate between two colors
-def interpolate_color(color1, color2, factor):
-    return (
-        int(color1[0] + (color2[0] - color1[0]) * factor),
-        int(color1[1] + (color2[1] - color1[1]) * factor),
-        int(color1[2] + (color2[2] - color1[2]) * factor)
-    )
-    
-# Converts seconds into MM:SS format:
-def convert_time(time):
-	return f"{str(int(time // 60)).zfill(2)}:{str(int(time % 60)).zfill(2)}"
 
-# Draws interactive buttons:
+# INTERACTIVE BUTTONS:
 def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
 	global show_paused, space_key_pressed
 	pause_rect = pg.Rect(0, 0, *PAUSE_BUTTON.get_size())
@@ -232,11 +205,6 @@ def draw_hint_button(mouse_x, mouse_y, mouse_clicked):
     else:
         hint_key_pressed = False
     return mouse_clicked
-
-
-
-
-
 
 def draw_leaderboard_button(mouse_x, mouse_y, mouse_clicked):
 	global show_leaderboard
@@ -436,7 +404,7 @@ def draw_shortcut_button(mouse_x, mouse_y, mouse_clicked):
 
 
 
-# Draws game panels:
+# GAME PANELS:
 def show_dim_screen():
 	dim_screen = pg.Surface(screen.get_size(), pg.SRCALPHA)
 	pg.draw.rect(dim_screen, (0, 0, 0, 220), dim_screen.get_rect())
@@ -927,7 +895,23 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 
 
 
-# Drawing functions for main gameplay:
+# DRAWING FUNCTIONS FOR MAIN GAMEPLAY:
+# Gets top-left corner coordinates of a tile based on its row (i) and column (j):
+def get_left_top_coords(i, j): 
+	x = j * TILE_WIDTH + margin_x
+	y = i * TILE_HEIGHT + margin_y
+	return x, y
+
+# Gets center coordinates of a tile based on its row (i) and column (j):
+def get_center_coords(i, j): 
+	x, y = get_left_top_coords(i, j)
+	return x + TILE_WIDTH // 2, y + TILE_HEIGHT // 2
+
+# Calculates row and column of tile clicked based on position of mouse click:
+def get_index_at_mouse(x, y): 
+	if x < margin_x or y < margin_y: return None, None
+	return (y - margin_y) // TILE_HEIGHT, (x - margin_x) // TILE_WIDTH
+
 # Draws game board:
 def draw_board(board):
 	for i in range(1, board_row - 1):
@@ -984,7 +968,9 @@ def draw_info(lives, level, score):
  
  
  
-# Gameplay functions:
+ 
+ 
+# GAMEPLAY FUNCTIONS:
 # Provides a hint by finding two matching tiles that can be connected:
 def get_hint(board):
 	hint = [] # stores two tuple
@@ -1098,6 +1084,18 @@ def get_random_board():
 			k += 1
 	return board
 
+# Function to interpolate between two colors
+def interpolate_color(color1, color2, factor):
+    return (
+        int(color1[0] + (color2[0] - color1[0]) * factor),
+        int(color1[1] + (color2[1] - color1[1]) * factor),
+        int(color1[2] + (color2[2] - color1[2]) * factor)
+    )
+    
+# Converts seconds into MM:SS format:
+def convert_time(time):
+	return f"{str(int(time // 60)).zfill(2)}:{str(int(time % 60)).zfill(2)}"
+
 # Draws a time bar:
 def draw_time_bar(start_time):
 	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
@@ -1157,7 +1155,7 @@ def draw_time_bar(start_time):
 
 
 
-# Sign-in system functions:
+# WORKING WITH PLAYERS AND ACCOUNTS:
 def load_players():
     try:
         with open('players.json', 'r') as f:
@@ -1233,7 +1231,6 @@ def add_player(name, password):
 	# highscore: [score, lives, spent_time, level]
     save_players(players)
     
-
 def reset_game_info():
 	global board, lives, level, remaining_time, curr_remaining_time, bonus_time, show_hint, score
 	board = None
@@ -1266,9 +1263,11 @@ def load_leaderboard():
 
 	return leaderboard
 
- 
- 
- 
+
+
+
+
+# GAME LOOPS:
 # Main menu loop:
 def start_screen():
 	global sound_on, music_on, current_player, user_background, board_row, board_column, num_same_tile, num_tile_on_board, margin_x, margin_y, board, lives, level, remaining_time, curr_remaining_time
@@ -1647,7 +1646,6 @@ def main():
 				remaining_time = game_time
 				level += 1
 				pg.time.wait(300)
-				pg.mixer.music.play()
 			elif signal == "time_up":
 				lives -= 1
 				show_hint = False
