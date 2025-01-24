@@ -1122,7 +1122,7 @@ def draw_time_bar(start_time):
 	time_text = FONT_PIXEL.render(convert_time(real_remaining_time), True, (255, 255, 255))
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
 	screen.blit(time_text, time_rect)
-
+	
 	# Calculate inner bar width
 	inner_width = max(0, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
     
