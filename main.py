@@ -87,6 +87,11 @@ SIZE_MEDIUM_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size
 SIZE_LARGE_BUTTON = pg.transform.scale(pg.image.load("assets/images/button/size_large.png"), (373, 72)).convert_alpha()
 SELECT_SIZE_PANEL = pg.transform.scale(pg.image.load("assets/images/button/select_size_panel.png"), (700, 469)).convert_alpha()
 INSTRUCTION_PANEL = pg.transform.scale(pg.image.load("assets/images/button/instruction.png"), (760, 469)).convert_alpha()
+I_MATCHING = pg.transform.scale(pg.image.load("assets/images/button/I_matching.png"), (760, 469)).convert_alpha()
+L_MATCHING = pg.transform.scale(pg.image.load("assets/images/button/L_matching.png"), (760, 469)).convert_alpha()
+U_MATCHING = pg.transform.scale(pg.image.load("assets/images/button/U_matching.png"), (760, 469)).convert_alpha()
+Z_MATCHING = pg.transform.scale(pg.image.load("assets/images/button/Z_matching.png"), (760, 469)).convert_alpha()
+
 SHORTCUT_PANEL = pg.transform.scale(pg.image.load("assets/images/button/shortcut_panel.png"), (1000, 500)).convert_alpha()
 LEADERBOARD_PANEL = pg.transform.scale(pg.image.load("assets/images/button/leaderboard_panel.png"), (1000, 600)).convert_alpha()
 
@@ -148,6 +153,9 @@ sound_key_pressed = False
 # Working with hints:
 current_hint = None  # Will store the current hint tiles
 show_hint = False   # Flag to control hint visibility
+
+# Working with instruction:
+current_instruction = 0
 
 # Initialize game info:
 board = None
@@ -494,10 +502,17 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 	return mouse_clicked, show_leaderboard
 
 def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
-    
+	global current_instruction
 	show_dim_screen()
+	
+	instructions = [INSTRUCTION_PANEL, I_MATCHING, L_MATCHING, U_MATCHING, Z_MATCHING]
 	instruct_rect = INSTRUCTION_PANEL.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-	screen.blit(INSTRUCTION_PANEL, instruct_rect)
+	screen.blit(instructions[current_instruction], instruct_rect)
+	
+	left_rect = LEFT_BUTTON.get_rect(center=(instruct_rect.centerx - 150, instruct_rect.bottom + 30))
+	screen.blit(LEFT_BUTTON, left_rect)
+	right_rect = RIGHT_BUTTON.get_rect(center=(instruct_rect.centerx + 150, instruct_rect.bottom + 30))
+	screen.blit(RIGHT_BUTTON, right_rect)
 
 	exit_rect = EXIT_BUTTON.get_rect(topright=(instruct_rect.right - 10, instruct_rect.top + 30))
 	screen.blit(EXIT_BUTTON, exit_rect)
@@ -508,7 +523,21 @@ def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
 		draw_dark_image(EXIT_BUTTON, exit_rect, (60, 60, 60))
 		if mouse_clicked:
 			mouse_clicked = False
+			current_instruction = 0
 			show_instruction = False
+			# click_sound.play()
+	elif left_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(LEFT_BUTTON, left_rect, (60, 60, 60))
+		if mouse_clicked:
+			current_instruction = max(0, current_instruction - 1)
+			mouse_clicked = False
+			# click_sound.play()
+   
+	elif right_rect.collidepoint(mouse_x, mouse_y):
+		draw_dark_image(RIGHT_BUTTON, right_rect, (60, 60, 60))
+		if mouse_clicked:
+			current_instruction = min(4, current_instruction + 1)
+			mouse_clicked = False
 			# click_sound.play()
 	return mouse_clicked, show_instruction
 
