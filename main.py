@@ -1191,6 +1191,8 @@ def load_players():
             try:
                 return json.load(f)
             except json.JSONDecodeError:
+                with open('players.json', 'w') as f:
+                    json.dump({}, f)
                 # If file is empty or corrupted, return empty dict
                 return {}
     except FileNotFoundError:
