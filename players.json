@@ -655,5 +655,41 @@
         null
       ]
     }
+  },
+  "TEST100": {
+    "password": "A",
+    "save": [
+      null,
+      1,
+      3,
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      0
+    ],
+    "highscore": {
+      "small": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "medium": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "large": [
+        null,
+        null,
+        null,
+        null
+      ]
+    }
   }
 }

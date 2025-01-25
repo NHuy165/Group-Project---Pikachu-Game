@@ -166,7 +166,7 @@ remaining_time = 0
 curr_remaining_time = 0
 score = 0
 
-TIME_SMALL = 5
+TIME_SMALL = 120
 TIME_MEDIUM = 180
 TIME_LARGE = 300
 
@@ -1211,7 +1211,7 @@ def update_players(command = ""):
 			players[current_player]["save"][0] = board
 			players[current_player]["save"][1] = level
 			players[current_player]["save"][2] = lives
-			players[current_player]["save"][3][level - 1] = curr_remaining_time - (game_time - remaining_time) if command != "RESET_CURR" else None
+			players[current_player]["save"][3][level - 1] = curr_remaining_time - (game_time - remaining_time)
 			players[current_player]["save"][4] = score
 
 		with open('players.json', 'w') as f:
@@ -1692,7 +1692,8 @@ def main():
 				remaining_time = game_time
 				curr_remaining_time = game_time
 				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
-				update_players("RESET_CURR")
+    
+				update_players()
 				level -= 1	
 				update_highscore(lives, score)	
     
