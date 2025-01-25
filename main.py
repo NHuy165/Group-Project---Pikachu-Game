@@ -166,7 +166,7 @@ remaining_time = 0
 curr_remaining_time = 0
 score = 0
 
-TIME_SMALL = 120
+TIME_SMALL = 5
 TIME_MEDIUM = 180
 TIME_LARGE = 300
 
@@ -501,7 +501,7 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			# click_sound.play()
 	return mouse_clicked, show_leaderboard
 
-def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
+def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked): 
 	global current_instruction
 	show_dim_screen()
 	
@@ -915,6 +915,7 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 		draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
 		if mouse_clicked or keys[pg.K_ESCAPE]:
 			draw_dark_image(HOME_BUTTON, home_rect, (120, 120, 120))
+			show_paused = False
 			click_sound.play()
 			return "start_screen"
 
@@ -1092,7 +1093,7 @@ def check_time():
 	if show_paused: 
 		return 2	
 	# check game lost
-	if curr_remaining_time - (game_time - remaining_time) < 0: # time up
+	if curr_remaining_time - (game_time - remaining_time) <= 0: # time up
 		curr_remaining_time = remaining_time = game_time
 		if lives <= 0: 
 			return 0
@@ -1130,7 +1131,7 @@ def draw_time_bar(start_time):
 	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
 	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2)
 	current_time = time.time()
-	 # ratio between remaining time and total time
+	
 	if show_paused:
 		if not time_start_paused: 
 			time_start_paused = time.time()
@@ -1140,31 +1141,30 @@ def draw_time_bar(start_time):
 			time_paused += current_time - time_start_paused
 		time_start_paused = 0
 
-		curr_remaining_time = game_time - (current_time - start_time - time_paused) + bonus_time
+		curr_remaining_time = max(0, game_time - (current_time - start_time) + time_paused + bonus_time)
 		if curr_remaining_time > game_time:
 			bonus_time -= curr_remaining_time - game_time
 			curr_remaining_time = game_time
+   
+	
       
   
 	real_remaining_time = curr_remaining_time - (game_time - remaining_time)
+	print(real_remaining_time, curr_remaining_time)
 	timeOut = real_remaining_time / game_time
 	time_text = FONT_PIXEL.render(convert_time(real_remaining_time), True, (255, 255, 255))
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
 	screen.blit(time_text, time_rect)
 	
-	# Calculate inner bar width
-	inner_width = max(0, TIME_BAR_WIDTH * timeOut - 4)  # Minimum width of 40 pixels
+	 
     
     # Interpolate color from green to red based on remaining time
 	green = (0, 255, 0)
 	red = (255, 0, 0)
 	color_factor = 1 - timeOut
 	bar_color = interpolate_color(green, red, color_factor)
-    
-    # If time is actually up, set width to 0
-	if timeOut <= 0:
-		inner_width = 0
-    
+  
+	inner_width = max(0, TIME_BAR_WIDTH * timeOut - 4)
 	innerPos = (TIME_BAR_POS[0] + 2, TIME_BAR_POS[1] + 2)
 	innerSize = (inner_width, TIME_BAR_HEIGHT - 4)
     
@@ -1656,7 +1656,7 @@ def playing():
 # Main game function:
 def main():
 	#init pygame and module
-	global level, lives, board, curr_remaining_time, remaining_time, show_hint
+	global level, lives, board, curr_remaining_time, remaining_time, show_hint, score
 	
 	while True:
 		start_screen()
@@ -1678,10 +1678,10 @@ def main():
 			elif signal == "time_up":
 				lives -= 1
 				show_hint = False
+				score = 0
 				board = get_random_board()
 				remaining_time = game_time
 			elif signal == "game_over":
-				update_players()
 				update_highscore(lives, score)	
 				update_players("RESET")
 				show_dim_screen()

@@ -197,10 +197,10 @@
     ],
     "highscore": {
       "small": [
-        null,
-        null,
-        null,
-        null
+        0,
+        0,
+        0,
+        1
       ],
       "medium": [
         null,
@@ -233,10 +233,10 @@
     ],
     "highscore": {
       "small": [
-        null,
-        null,
-        null,
-        null
+        60,
+        0,
+        0,
+        1
       ],
       "medium": [
         null,
