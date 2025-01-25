@@ -1147,18 +1147,18 @@ def draw_time_bar(start_time):
 			curr_remaining_time = game_time
    
 	
-      
+	print(curr_remaining_time)
   
 	real_remaining_time = curr_remaining_time - (game_time - remaining_time)
-	print(real_remaining_time, curr_remaining_time)
-	timeOut = real_remaining_time / game_time
+	
 	time_text = FONT_PIXEL.render(convert_time(real_remaining_time), True, (255, 255, 255))
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
 	screen.blit(time_text, time_rect)
 	
 	 
-    
+	timeOut = real_remaining_time / game_time
     # Interpolate color from green to red based on remaining time
+	print(timeOut)
 	green = (0, 255, 0)
 	red = (255, 0, 0)
 	color_factor = 1 - timeOut
@@ -1199,10 +1199,6 @@ def load_players():
             json.dump({}, f)
         return {}
 
-def save_players(players):
-    with open('players.json', 'w') as f:
-        json.dump(players, f, indent = 2)
-
 def update_players(command = ""):
 	players = load_players()
 	if current_player != "[Guest]":
@@ -1213,10 +1209,11 @@ def update_players(command = ""):
 			players[current_player]["save"][0] = board
 			players[current_player]["save"][1] = level
 			players[current_player]["save"][2] = lives
-			players[current_player]["save"][3][level - 1] = curr_remaining_time - (game_time - remaining_time)
+			players[current_player]["save"][3][level - 1] = curr_remaining_time - (game_time - remaining_time) if command != "RESET_CURR" else None
 			players[current_player]["save"][4] = score
 
-		save_players(players)
+		with open('players.json', 'w') as f:
+			json.dump(players, f, indent = 2)
   
 def update_highscore(lives, score):
 	if current_player != "[Guest]":
@@ -1238,13 +1235,15 @@ def update_highscore(lives, score):
 		total_spent_time = sum(spent_time)
   
 		if players[current_player]["highscore"][game_size][0] is None or [score, lives, -total_spent_time, level] > current_highscore:
+			# Reset highscore:
+   
 			players[current_player]["highscore"][game_size][0] = score
 			players[current_player]["highscore"][game_size][1] = lives
 			players[current_player]["highscore"][game_size][2] = total_spent_time
 			players[current_player]["highscore"][game_size][3] = level
 			
-	
-		save_players(players)
+		with open('players.json', 'w') as f:
+			json.dump(players, f, indent = 2)
 
 def verify_player(name, password):
     players = load_players()
@@ -1253,12 +1252,13 @@ def verify_player(name, password):
     return False
 
 def add_player(name, password):
-    players = load_players()
-    players[name] = {"password": password, "save": [None, 1, 3, [None, None, None, None, None], 0], "highscore": {"small": [None, None, None, None], "medium": [None, None, None, None], "large": [None, None, None, None]}}
-    # save: [board, level, lives, spent_time, score]
+	players = load_players()
+	players[name] = {"password": password, "save": [None, 1, 3, [None, None, None, None, None], 0], "highscore": {"small": [None, None, None, None], "medium": [None, None, None, None], "large": [None, None, None, None]}}
+	# save: [board, level, lives, spent_time, score]
 		# spent_time: [level1, level2, level3, level4, level5]
 	# highscore: [score, lives, spent_time, level]
-    save_players(players)
+	with open('players.json', 'w') as f:
+		json.dump(players, f, indent = 2)
     
 def reset_game_info():
 	global board, lives, level, remaining_time, curr_remaining_time, bonus_time, show_hint, score
@@ -1656,7 +1656,7 @@ def playing():
 # Main game function:
 def main():
 	#init pygame and module
-	global level, lives, board, curr_remaining_time, remaining_time, show_hint, score
+	global level, lives, board, curr_remaining_time, remaining_time, show_hint, score, warning_sound_played
 	
 	while True:
 		start_screen()
@@ -1665,8 +1665,9 @@ def main():
 			random.shuffle(LIST_BACKGROUND)
 			signal = playing()
 			if signal == "start_screen":
+				warning_sound_played = False
+				warning_sound.stop()
 				update_players()
-				update_highscore(lives, score)
 				reset_game_info()
 				break
 			elif signal == "next":
@@ -1677,14 +1678,25 @@ def main():
 				pg.time.wait(300)
 			elif signal == "time_up":
 				lives -= 1
+				remaining_time = game_time
+				curr_remaining_time = game_time
+				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
+
 				show_hint = False
-				score = 0
+
 				board = get_random_board()
 				remaining_time = game_time
 			elif signal == "game_over":
+				remaining_time = game_time
+				curr_remaining_time = game_time
+				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
+				update_players("RESET_CURR")
+				level -= 1	
 				update_highscore(lives, score)	
+    
 				update_players("RESET")
 				show_dim_screen()
+    
 				game_over_sound.play()
 				pg.mixer.music.pause()
 				start_end = time.time()
