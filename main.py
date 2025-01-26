@@ -41,8 +41,8 @@ TIME_ICON = pg.transform.scale(pg.image.load("assets/images/tiles/section1.png")
 
 # Game level and time:
 MAX_LEVEL = 5
-TIME_VICTORY = 6
-TIME_END = 6 # Game over screen time
+TIME_VICTORY = 7
+TIME_END = 5.5 # Game over screen time
 
 # Font loading:
 FONT_COMICSANSMS = pg.font.SysFont('dejavusans', 40)
@@ -114,15 +114,15 @@ music_on = True
 
 # Sounds:
 click_sound = pg.mixer.Sound("assets/sound/click_sound.mp3")
-click_sound.set_volume(0.2)
+click_sound.set_volume(0.4)
 success_sound = pg.mixer.Sound("assets/sound/success.mp3")
 success_sound.set_volume(0.2)
 fail_sound = pg.mixer.Sound("assets/sound/fail.mp3")
 fail_sound.set_volume(0.2)
 win_sound = pg.mixer.Sound("assets/sound/win.mp3")
-win_sound.set_volume(0.2)
-game_over_sound = pg.mixer.Sound("assets/sound/gameover.wav")
-game_over_sound.set_volume(0.2)
+win_sound.set_volume(0.4)
+game_over_sound = pg.mixer.Sound("assets/sound/gameover.mp3")
+game_over_sound.set_volume(0.4)
 sound_on = True
 
 # Load the warning sound
