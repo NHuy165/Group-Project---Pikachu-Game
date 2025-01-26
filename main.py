@@ -114,7 +114,7 @@ music_on = True
 
 # Sounds:
 click_sound = pg.mixer.Sound("assets/sound/click_sound.mp3")
-click_sound.set_volume(0.4)
+click_sound.set_volume(1)
 success_sound = pg.mixer.Sound("assets/sound/success.mp3")
 success_sound.set_volume(0.2)
 fail_sound = pg.mixer.Sound("assets/sound/fail.mp3")
@@ -190,7 +190,7 @@ def draw_pause_button(mouse_x, mouse_y, mouse_clicked):
 			if mouse_clicked or (keys[pg.K_SPACE] and not space_key_pressed):
 				mouse_clicked = False
 				show_paused = True
-				# click_sound.play()
+				click_sound.play()
 				space_key_pressed = True  # Set the flag to indicate the space key is pressed
 	else:
 		space_key_pressed = False  # Reset the flag when the space key is released
@@ -345,7 +345,7 @@ def draw_sound_button(mouse_x, mouse_y, mouse_clicked):
 				sound_on = True
 				success_sound.set_volume(0.2)
 				fail_sound.set_volume(0.2)
-				click_sound.set_volume(0.2)
+				click_sound.set_volume(1)
 			click_sound.play()
 	else:
 		sound_key_pressed = False
@@ -460,21 +460,21 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			show_leaderboard = False
 			leaderboard_size = "small"
 			leaderboard_start = 0
-			# click_sound.play()
+			click_sound.play()
    
 	elif up_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(UP_BUTTON, up_rect, (60, 60, 60))
 		if mouse_clicked:
 			mouse_clicked = False
 			leaderboard_start = max(0, leaderboard_start - 1)
-			# click_sound.play()
+			click_sound.play()
    
 	elif down_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(DOWN_BUTTON, down_rect, (60, 60, 60))
 		if mouse_clicked:
 			mouse_clicked = False
 			leaderboard_start = min(len(leaderboard) - max_display, leaderboard_start + 1)
-			# click_sound.play()
+			click_sound.play()
    
 	elif left_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(LEFT_BUTTON, left_rect, (60, 60, 60))
@@ -486,7 +486,7 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			else:	
 				leaderboard_size = "medium"
 			mouse_clicked = False
-			# click_sound.play()
+			click_sound.play()
    
 	elif right_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(RIGHT_BUTTON, right_rect, (60, 60, 60))
@@ -498,7 +498,7 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 			else:
 				leaderboard_size = "small"
 			mouse_clicked = False
-			# click_sound.play()
+			click_sound.play()
 	return mouse_clicked, show_leaderboard
 
 def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked): 
@@ -525,20 +525,20 @@ def draw_panel_instruction(mouse_x, mouse_y, mouse_clicked):
 			mouse_clicked = False
 			current_instruction = 0
 			show_instruction = False
-			# click_sound.play()
+			click_sound.play()
 	elif left_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(LEFT_BUTTON, left_rect, (60, 60, 60))
 		if mouse_clicked:
 			current_instruction = max(0, current_instruction - 1)
 			mouse_clicked = False
-			# click_sound.play()
+			click_sound.play()
    
 	elif right_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(RIGHT_BUTTON, right_rect, (60, 60, 60))
 		if mouse_clicked:
 			current_instruction = min(4, current_instruction + 1)
 			mouse_clicked = False
-			# click_sound.play()
+			click_sound.play()
 	return mouse_clicked, show_instruction
 
 def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
@@ -556,7 +556,7 @@ def draw_panel_shortcut(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_shortcut = False
-			# click_sound.play()
+			click_sound.play()
 	return mouse_clicked, show_shortcut
 
 def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
@@ -584,7 +584,7 @@ def draw_panel_warning_saveless(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_warning_saveless = False
-			# click_sound.play()
+			click_sound.play()
 
 	return mouse_clicked, show_warning_saveless, show_select_size
 
@@ -613,7 +613,7 @@ def draw_panel_warning_guest(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_warning_guest = False
-			# click_sound.play()
+			click_sound.play()
 
 	return mouse_clicked, show_warning_guest, show_select_size
 
@@ -639,7 +639,7 @@ def draw_panel_sign_in(mouse_x, mouse_y, mouse_clicked, input_active, name_input
 			error = ""  
 			name_input = ""  
 			password_input = ""
-			# click_sound.play()
+			click_sound.play()
    
 	elif OK_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(OK_BUTTON, OK_rect, (60, 60, 60))
@@ -724,7 +724,7 @@ def draw_panel_register(mouse_x, mouse_y, mouse_clicked, input_active, name_inpu
 			error = "" 
 			name_input = ""  
 			password_input = ""
-			# click_sound.play()
+			click_sound.play()
 
 	elif OK_rect.collidepoint(mouse_x, mouse_y):
 		draw_dark_image(OK_BUTTON, OK_rect, (60, 60, 60))
@@ -856,7 +856,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked:
 			mouse_clicked = False
 			show_select_size = False
-			# click_sound.play()
+			click_sound.play()
 
 	if start_game:
 		margin_x = (SCREEN_WIDTH - TILE_WIDTH * board_column) // 2
