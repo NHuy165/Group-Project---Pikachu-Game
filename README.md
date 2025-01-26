@@ -1,5 +1,5 @@
 # Pikachu Game
-## Đây là kho lưu trữ của đồ án môn học Cơ sở lập trình cho trí tuệ nhân tạo - Tường đại học Khoa học Tự nhiên - Đại học Quốc gia Thành phố Hồ Chí Minh
+### Đây là kho lưu trữ của đồ án môn học Cơ sở lập trình cho trí tuệ nhân tạo - Tường đại học Khoa học Tự nhiên - Đại học Quốc gia Thành phố Hồ Chí Minh
 [Video demo của dự án]
 
 ### Cấu trúc phân cấp của dự án
