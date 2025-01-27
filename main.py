@@ -1676,11 +1676,11 @@ def main():
 				pg.time.wait(300)
 			elif signal == "time_up":
 				lives -= 1
-				remaining_time = curr_remaining_time = game_time
+				remaining_time = game_time
 				show_hint = False
 			elif signal == "replay":
 				lives -= 1
-				remaining_time = curr_remaining_time = game_time
+				remaining_time = game_time
 				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
 				board = get_random_board()
 				show_hint = False
