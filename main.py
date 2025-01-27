@@ -446,7 +446,10 @@ def draw_panel_leaderboard(mouse_x, mouse_y, mouse_clicked):
 	screen.blit(size_text, size_rect)
  
 	for i, (name, highscore, lives, spent_time, level) in leaderboard[leaderboard_start:leaderboard_start + max_display]:
-		text = f"{i + 1}. {name} - {highscore if highscore is not None else "N/A"} (Level: {level if level is not None else "N/A"} - Lives: {lives if lives is not None else "N/A"} - Time: {convert_time(spent_time) if spent_time is not None else "N/A"})"
+		if highscore is None:
+			text = f"{i + 1}. {name} - No record available"
+		else:
+			text = f"{i + 1}. {name} - {highscore if highscore is not None else "N/A"} (Level: {level if level is not None else "N/A"} - Lives: {lives if lives is not None else "N/A"} - Time: {convert_time(spent_time) if spent_time is not None else "N/A"})"
 		text_surface = FONT_PIXEL_SMALL.render(text, True, (0, 0, 0))
 		text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, leaderboard_rect.top + y_offset))
 		
