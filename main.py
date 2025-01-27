@@ -1094,7 +1094,6 @@ def check_time():
 		return 2	
 	# check game lost
 	if curr_remaining_time - (game_time - remaining_time) <= 0: # time up
-		curr_remaining_time = remaining_time = game_time
 		if lives <= 0: 
 			return 0
 		return 1
@@ -1131,7 +1130,6 @@ def draw_time_bar(start_time):
 	global time_start_paused, time_paused, curr_remaining_time, bonus_time, warning_sound_played
 	pg.draw.rect(screen, (255,255,255,5), (TIME_BAR_POS[0], TIME_BAR_POS[1], TIME_BAR_WIDTH, TIME_BAR_HEIGHT), 2)
 	current_time = time.time()
-	
 	if show_paused:
 		if not time_start_paused: 
 			time_start_paused = time.time()
@@ -1145,11 +1143,8 @@ def draw_time_bar(start_time):
 		if curr_remaining_time > game_time:
 			bonus_time -= curr_remaining_time - game_time
 			curr_remaining_time = game_time
-   
-	
-	print(curr_remaining_time)
   
-	real_remaining_time = curr_remaining_time - (game_time - remaining_time)
+	real_remaining_time = max(0, curr_remaining_time - (game_time - remaining_time))
 	
 	time_text = FONT_PIXEL.render(convert_time(real_remaining_time), True, (255, 255, 255))
 	time_rect = time_text.get_rect(center=(SCREEN_WIDTH // 2, 18))
@@ -1158,7 +1153,6 @@ def draw_time_bar(start_time):
 	 
 	timeOut = real_remaining_time / game_time
     # Interpolate color from green to red based on remaining time
-	print(timeOut)
 	green = (0, 255, 0)
 	red = (255, 0, 0)
 	color_factor = 1 - timeOut
@@ -1238,7 +1232,7 @@ def update_highscore(lives, score):
   
 		if players[current_player]["highscore"][game_size][0] is None or [score, lives, -total_spent_time, level] > current_highscore:
 			# Reset highscore:
-   
+			print(score)
 			players[current_player]["highscore"][game_size][0] = score
 			players[current_player]["highscore"][game_size][1] = lives
 			players[current_player]["highscore"][game_size][2] = total_spent_time
@@ -1670,6 +1664,7 @@ def main():
 				warning_sound_played = False
 				warning_sound.stop()
 				update_players()
+				update_highscore(lives, score)	
 				reset_game_info()
 				break
 			elif signal == "next":
@@ -1680,26 +1675,16 @@ def main():
 				pg.time.wait(300)
 			elif signal == "time_up":
 				lives -= 1
-				remaining_time = game_time
-				curr_remaining_time = game_time
-				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
-
+				remaining_time = curr_remaining_time = game_time
 				show_hint = False
-
-				board = get_random_board()
-				remaining_time = game_time
 			elif signal == "game_over":
-				remaining_time = game_time
-				curr_remaining_time = game_time
-				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
     
 				update_players()
-				level -= 1	
 				update_highscore(lives, score)	
-    
 				update_players("RESET")
-				show_dim_screen()
+				reset_game_info()
     
+				show_dim_screen()
 				game_over_sound.play()
 				pg.mixer.music.pause()
 				start_end = time.time()
@@ -1707,7 +1692,6 @@ def main():
 					gameover_width, gameover_height = GAMEOVER_BACKGROUND.get_size()
 					screen.blit(GAMEOVER_BACKGROUND, (SCREEN_WIDTH // 2 - gameover_width // 2, SCREEN_HEIGHT // 2 - gameover_height // 2))
 					pg.display.flip()
-				reset_game_info()
 				pg.mixer.music.unpause()
 				break
 			elif signal == "victory":
