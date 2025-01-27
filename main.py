@@ -963,9 +963,7 @@ def draw_clicked_tiles(board, clicked_tiles):
 	for i, j in clicked_tiles:
 		x, y = get_left_top_coords(i, j)
 		try:
-			darkImage = LIST_TILE[board[i][j]].copy()
-			darkImage.fill((60, 60, 60), special_flags = pg.BLEND_RGB_SUB)
-			screen.blit(darkImage, (x, y))
+			draw_dark_image(LIST_TILE[board[i][j]], (x, y), (60, 60, 60))
 		except: pass
 
 # Draws blue border around a specified tile:
