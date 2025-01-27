@@ -912,7 +912,7 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked or keys[pg.K_r]:
 			draw_dark_image(REPLAY_BUTTON, replay_rect, (120, 120, 120))
 			click_sound.play()
-			return "time_up"
+			return "replay"
 
 	if home_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_ESCAPE]:
 		draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
@@ -967,7 +967,7 @@ def draw_clicked_tiles(board, clicked_tiles):
 		except: pass
 
 # Draws blue border around a specified tile:
-def draw_border_tile(board, i, j):
+def draw_border_tile(i, j):
 	x, y = get_left_top_coords(i, j)
 	pg.draw.rect(screen, (0, 0, 255),(x - 1, y - 3, TILE_WIDTH + 4, TILE_HEIGHT + 4), 2)
 
@@ -1584,8 +1584,8 @@ def playing():
   
 		if show_paused:
 			select = draw_panel_paused(mouse_x, mouse_y, mouse_clicked)
-			if select == "time_up":
-				return "time_up"
+			if select == "replay":
+				return "replay"
 			elif select == "start_screen":	
 				return "start_screen"
 			else:
@@ -1597,7 +1597,7 @@ def playing():
 		try:
 			tile_i, tile_j = get_index_at_mouse(mouse_x, mouse_y)
 			if board[tile_i][tile_j] != 0 and not show_paused:
-				draw_border_tile(board, tile_i, tile_j)
+				draw_border_tile(tile_i, tile_j)
 				if mouse_clicked:
 					mouse_clicked = False
 					clicked_tiles.append((tile_i, tile_j))
@@ -1677,6 +1677,12 @@ def main():
 			elif signal == "time_up":
 				lives -= 1
 				remaining_time = curr_remaining_time = game_time
+				show_hint = False
+			elif signal == "replay":
+				lives -= 1
+				remaining_time = curr_remaining_time = game_time
+				score -= sum([line[1:-1].count(0) for line in board[1:-1]]) // 2 * 10
+				board = get_random_board()
 				show_hint = False
 			elif signal == "game_over":
     
