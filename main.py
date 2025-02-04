@@ -871,7 +871,7 @@ def draw_panel_select_size(mouse_x, mouse_y, mouse_clicked):
 	
 	return mouse_clicked, show_select_size
 
-def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
+def draw_panel_paused(mouse_x, mouse_y, mouse_clicked, error_replay):
 	global lives, space_key_pressed
  
 	show_dim_screen()
@@ -902,6 +902,7 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 			mouse_clicked = False
 			draw_dark_image(CONTINUE_BUTTON, continue_rect, (120, 120, 120))
 			show_paused = False
+			error_replay = ""
 			click_sound.play()
 			space_key_pressed = True  # Set the flag to indicate the space key is pressed
 	elif not keys[pg.K_SPACE]:
@@ -912,7 +913,11 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 		if mouse_clicked or keys[pg.K_r]:
 			draw_dark_image(REPLAY_BUTTON, replay_rect, (120, 120, 120))
 			click_sound.play()
-			return "replay"
+			if lives > 0:
+				return "replay"
+			else:
+				error_replay = "Restart failed: No lives remaining"
+				fail_sound.play()
 
 	if home_rect.collidepoint(mouse_x, mouse_y) or keys[pg.K_ESCAPE]:
 		draw_dark_image(HOME_BUTTON, home_rect, (60, 60, 60))
@@ -922,7 +927,12 @@ def draw_panel_paused(mouse_x, mouse_y, mouse_clicked):
 			click_sound.play()
 			return "start_screen"
 
-	return mouse_clicked, show_paused
+	if error_replay:
+		error_text = FONT_PIXEL.render(error_replay, True, (255, 0, 0))
+		error_rect = error_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+		screen.blit(error_text, error_rect)
+
+	return mouse_clicked, show_paused, error_replay
 
 
 
@@ -1489,6 +1499,7 @@ def playing():
 	time_paused = 0
 	bonus_time = 0
 	start_time = time.time()
+	error_replay = ""
 
 	background = LIST_BACKGROUND[0] # get random background
 
@@ -1583,13 +1594,13 @@ def playing():
 			return "time_up"
   
 		if show_paused:
-			select = draw_panel_paused(mouse_x, mouse_y, mouse_clicked)
+			select = draw_panel_paused(mouse_x, mouse_y, mouse_clicked, error_replay)
 			if select == "replay":
 				return "replay"
 			elif select == "start_screen":	
 				return "start_screen"
 			else:
-				mouse_clicked, show_paused = select
+				mouse_clicked, show_paused, error_replay = select
 
 
 		
